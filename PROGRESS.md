@@ -17,13 +17,13 @@
 - 已实测解释器：`C:\Users\wwx\miniconda3\envs\dllab\python.exe`。
 - Python：`3.11.17`；PyTorch：`2.10.0+cpu`；C02 CPU 作业运行成功，未修改依赖。
 
-### 当前 Windows 设备（2026-10-13 重新验证）
+### Windows 设备历史（2026-10-13 验证，不代表当前 Linux 设备）
 
 - 学生说明已切换至 Windows、CPU 与集成显卡环境；本课使用 CPU，不调用集成显卡。
 - 已实测解释器：`C:\Users\wwx\miniconda3\envs\dllab\python.exe`；Python `3.11.17`；PyTorch `2.10.0+cpu`；`torch.cuda.is_available()` 为 False。
 - 未修改依赖；Session 031 已在本机成功运行 C05 作业；未在本机重跑 C04。
 
-### Linux 设备历史（2026-10-13 验证，不代表当前 Windows 设备）
+### 当前 Linux 设备（2026-10-13 恢复课程后重新验证）
 
 - 项目根目录：`~/projects/DeepLearningLab/`。
 - 已有内容：`lessons/`、`nanoGPT/`、`README.md`。
@@ -38,12 +38,12 @@
 
 | 字段 | 当前内容 |
 |---|---|
-| 当前主要课程 | `C05` 已完成；下一课为 C06 梯度累积与梯度控制（尚未开课） |
-| 实际作业 | `lessons/05_autograd.py`（CPU 前向与参数梯度已验证）；C01–C04 作业保留 |
-| 作业状态 | C05 `PASSED`（当前 CPU 运行正确，核心图属性与求导已体现；导师核对解析梯度，学生未独立提交解析对照） |
+| 当前主要课程 | `C06` — 梯度累积与梯度控制 |
+| 实际作业 | `lessons/06_grad_control.py`（已开始编写，尚未运行验收）；C01–C05 作业保留 |
+| 作业状态 | C06 `IN_PROGRESS`（梯度累积/清理与 detach 对照已运行正确；尚缺 no_grad/inference_mode 及退出后的正常记录对照）；C05 `PASSED` |
 | 通过验收的课次 | `C01`、`C02`、`C03`、`C04`、`C05`（不等同于全部内容无需提示的独立熟练） |
 | 当前里程碑 | P-C 之前；长期 P-E 是独立 mini-GPT |
-| 下一个最小动作 | 用户开始下一课时展开 C06，联系当前非叶子梯度保存与默认参数梯度累积；不自动开课 |
+| 下一个最小动作 | 保留已验证部分；在 no_grad 和 inference_mode 范围内分别重新计算预测并观察图属性，退出后重新计算普通预测确认记录恢复 |
 
 ## 3. 已讲解但尚未通过的知识
 
@@ -65,7 +65,7 @@
 
 - Python：`import`、对象属性 `.` 的直观用法、索引/切片的最初介绍。
 - Conda / pip：环境创建与激活、依赖隔离的基本概念；此前讲解时的环境名示例与真实环境不同。
-- PyTorch C06：尚未开课；C05 已通过但叶子/非叶子梯度保存需持续复习。B05 未整模块验收；B03/B04 整模块尚未验收。
+- PyTorch C06：已讲解，尚未验收；C05 已通过但叶子/非叶子梯度保存需持续复习。B05 未整模块验收；B03/B04 整模块尚未验收。
 - 项目结构：项目与模块的初步区别；尚未独立构建完整包。
 
 **不应从上述记录推断：**学生已能独立完成张量运算、Autograd、MLP、Transformer、Diffusion 或 Flow Matching。
@@ -404,6 +404,43 @@
 - **可选改进**：通常数据/目标不需梯度；当前开启属于额外求导观察，不影响参数梯度正确性。try/except RuntimeError 不捕获 UserWarning；可选亲自补解析公式对照及反向前 grad 观察。
 - **下一步**：用户请求开课时进入 C06 梯度累积、detach、no_grad 与 inference_mode；本轮不推进新课。
 - **环境变更 / Git commit**：无；未修改学生代码。
+
+### Session 032 — 2026-10-13（Git pull 后恢复 Linux 环境，C06 开课）
+
+- **恢复依据**：用户说明已 pull 并回到 CUDA 12.8 设备；重新读取最新 AGENTS.md、PROGRESS.md Session 031、LEARNING_PLAN.md 对应模块与教学 skill，确认 C05 已在 Windows CPU 环境通过。只读检查 lessons/05_autograd.py，不重复 C05 验收。
+- **设备实测**：Linux dllab 解释器 /home/wwx/anaconda3/envs/dllab/bin/python、Python 3.11.17、Torch 2.10.0+cu128、torch.version.cuda=12.8、CUDA 可用，GPU 为 NVIDIA RTX PRO 6000 Blackwell Workstation Edition；未修改依赖。
+- **本课意义与内容**：为正确组织训练/验证铺垫，区分梯度数值累积、计算图的生命周期和梯度记录范围；讲解 grad=None/zero_、detach 的断图与共享存储、no_grad 的上下文范围、inference_mode 的推理用途及更严格张量限制。
+- **任务**：学生在 lessons/06_grad_control.py 使用 C05 的线性回归，重新前向两次观察累积、清理后第三次反向；对照普通预测、detach、no_grad、inference_mode 的数值与图属性。可在 CUDA 直接创建叶子参数；不强制 CPU fallback、预测注释或完整手算，不提供可运行答案。
+- **状态与验证边界**：C06 EXPLAINED；仅查询环境及读取代码，未运行学生作业或新增验收证据。查阅 PyTorch 2.10 官方 backward/detach/no_grad/inference_mode 文档。
+- **Git 状态**：修改进度前本地 main 工作区干净；未执行 fetch/pull/push 或核查远端，用户的 pull 陈述按其自述记录。
+- **下一步**：集中审阅核心累积/清理结果与梯度控制行为，正确体现本章核心内容即可验收。
+
+### Session 033 — 2026-10-13（澄清 C06 实验步骤与观察对象）
+
+- **学生反馈**：不清楚本次实验需要完成什么，要求更清晰说明；此前简短复习了 for/range 与 f-string，不能据此认定已独立掌握全部语法。
+- **只读观察**：lessons/06_grad_control.py 已有数据/叶子参数、两次重新前向并反向的循环；另一段 no_grad 上下文中仍计算 loss 并调用 backward。未执行脚本，不虚构错误输出或验收结果。
+- **补讲**：实验分成梯度累积/清理与四种预测结果的图属性对照；no_grad 不清理历史 grad，范围内普通前向结果无反向图，因此本部分只观察预测，不调用 backward。
+- **具体任务**：已有累积循环保留；清理后重新正常前向反向一次；分别产生普通、detach、no_grad、inference_mode 预测，观察数值/Shape/requires_grad/grad_fn；退出上下文后验证正常前向恢复记录。无需更新参数、额外训练、预测注释或完整手算。
+- **状态**：C06 IN_PROGRESS；仅澄清作业，不增加验收关卡，不提供可运行代码。
+- **下一步**：学生自行补齐同一文件，集中验收核心行为。
+- **环境变更 / Git commit**：无。
+
+### Session 034 — 2026-10-13（定位 detach 的对象、时机与返回值）
+
+- **只读观察**：C06 文件已补清理 w/b.grad 并重新前向反向；第 33 行产生 y_hat 后，第 35–36 行对 w/b 调用 detach 但未接住返回值，随后仍用原 y_hat 计算 loss 并反向。未运行本次文件。
+- **学生疑问**：detach 应对哪个 Tensor、何时调用。
+- **针对性提示**：本实验对正常前向得到的 y_hat 调用 detach，并用新名字接住返回值，比较原预测与 detached 预测的数值/Shape/requires_grad/grad_fn；不对 w/b 做本次断图实验，不在对照部分计算 loss 或 backward。未接住返回值不会修改原对象，后来 detach 也不会追溯改变已建立的图。
+- **状态与下一步**：C06 IN_PROGRESS；学生先自行修正 detach 对照，再继续 no_grad/inference_mode 原定任务；不新增验收项、不代写可运行代码。
+- **环境变更 / Git commit**：无。
+
+### Session 035 — 2026-10-13（C06 累积/清理与 detach 对照验收）
+
+- **学生修改**：对正常前向的 y_hat 调用 detach 并接住返回值，打印两者数值/Shape/requires_grad/grad_fn；保留原 y_hat 的 loss 与 backward。
+- **运行证据**：conda run -n dllab python lessons/06_grad_control.py，退出码 0；首次 w/b.grad 为 [-9.3333]/[-4]，第二次累积为 [-18.6667]/[-8]，清理后恢复首次结果。原预测数值 [1,2,3]、Shape [3]、requires_grad=True、grad_fn=AddBackward0；detached 结果数值/Shape 相同、requires_grad=False、grad_fn=None。
+- **解释确认**：学生观察 detach 与是否计算 loss/backward 无关；导师限定为 detach 返回结果不再连接原图，原 y_hat 未改变。第 47 行 loss 使用原 y_hat，所以第 48 行反向仍成功；不把它误记为 detached 分支可反向。
+- **验收结论**：梯度累积/清理及 detach 小节通过；C06 整课 IN_PROGRESS，no_grad/inference_mode 原定核心内容尚未实现，不额外增加任务。
+- **下一步**：补两个上下文内重新前向的图属性对照及退出后正常前向的记录恢复；不要求删除正确的原预测反向，不要求预测注释。
+- **环境变更 / Git commit**：无；未改写学生代码。
 
 ## 7. 后续 Session 模板（复制本段追加，不要覆盖历史）
 
