@@ -17,13 +17,13 @@
 - 已实测解释器：`C:\Users\wwx\miniconda3\envs\dllab\python.exe`。
 - Python：`3.11.17`；PyTorch：`2.10.0+cpu`；C02 CPU 作业运行成功，未修改依赖。
 
-### Windows 设备历史（2026-10-13 验证，不代表当前 Linux 设备）
+### 当前 Windows 设备（2026-10-13 Session 036 重新验证）
 
 - 学生说明已切换至 Windows、CPU 与集成显卡环境；本课使用 CPU，不调用集成显卡。
 - 已实测解释器：`C:\Users\wwx\miniconda3\envs\dllab\python.exe`；Python `3.11.17`；PyTorch `2.10.0+cpu`；`torch.cuda.is_available()` 为 False。
-- 未修改依赖；Session 031 已在本机成功运行 C05 作业；未在本机重跑 C04。
+- 未修改依赖；Session 031 已在本机成功运行 C05，Session 036 已运行 C06 现有累积/清理与 detach 部分成功；未在本机重跑 C04。
 
-### 当前 Linux 设备（2026-10-13 恢复课程后重新验证）
+### Linux 设备历史（2026-10-13 恢复课程后验证，不代表当前 Windows 设备）
 
 - 项目根目录：`~/projects/DeepLearningLab/`。
 - 已有内容：`lessons/`、`nanoGPT/`、`README.md`。
@@ -38,12 +38,12 @@
 
 | 字段 | 当前内容 |
 |---|---|
-| 当前主要课程 | `C06` — 梯度累积与梯度控制 |
-| 实际作业 | `lessons/06_grad_control.py`（已开始编写，尚未运行验收）；C01–C05 作业保留 |
-| 作业状态 | C06 `IN_PROGRESS`（梯度累积/清理与 detach 对照已运行正确；尚缺 no_grad/inference_mode 及退出后的正常记录对照）；C05 `PASSED` |
-| 通过验收的课次 | `C01`、`C02`、`C03`、`C04`、`C05`（不等同于全部内容无需提示的独立熟练） |
+| 当前主要课程 | `C08` — 损失函数、优化器与最小训练循环，联系 B08 梯度下降 |
+| 实际作业 | 下一份学生手写文件 `lessons/08_train_linear.py`；C01–C07 作业保留 |
+| 作业状态 | C08 `EXPLAINED`（已讲解并布置任务，尚未提交）；C07 已通过 |
+| 通过验收的课次 | `C01`、`C02`、`C03`、`C04`、`C05`、`C06`、`C07`（不等同于全部内容无需提示的独立熟练） |
 | 当前里程碑 | P-C 之前；长期 P-E 是独立 mini-GPT |
-| 下一个最小动作 | 保留已验证部分；在 no_grad 和 inference_mode 范围内分别重新计算预测并观察图属性，退出后重新计算普通预测确认记录恢复 |
+| 下一个最小动作 | 学生用标量线性 Module、MSELoss 与 SGD 手写 100 次全批量训练，观察参数更新及初始/最终 loss，最终 no_grad 评估 |
 
 ## 3. 已讲解但尚未通过的知识
 
@@ -65,7 +65,7 @@
 
 - Python：`import`、对象属性 `.` 的直观用法、索引/切片的最初介绍。
 - Conda / pip：环境创建与激活、依赖隔离的基本概念；此前讲解时的环境名示例与真实环境不同。
-- PyTorch C06：已讲解，尚未验收；C05 已通过但叶子/非叶子梯度保存需持续复习。B05 未整模块验收；B03/B04 整模块尚未验收。
+- PyTorch C08：已讲 MSELoss、SGD 学习率与参数引用、zero_grad/backward/step 的职责和训练循环顺序；尚未验收。B08 本次联系梯度下降，不整模块标记通过。C07 类/初始化、C06 梯度模式及 C05 梯度保存需复习；A03/A05/A06、B05 与 B03/B04 未整模块验收。
 - 项目结构：项目与模块的初步区别；尚未独立构建完整包。
 
 **不应从上述记录推断：**学生已能独立完成张量运算、Autograd、MLP、Transformer、Diffusion 或 Flow Matching。
@@ -441,6 +441,74 @@
 - **验收结论**：梯度累积/清理及 detach 小节通过；C06 整课 IN_PROGRESS，no_grad/inference_mode 原定核心内容尚未实现，不额外增加任务。
 - **下一步**：补两个上下文内重新前向的图属性对照及退出后正常前向的记录恢复；不要求删除正确的原预测反向，不要求预测注释。
 - **环境变更 / Git commit**：无；未改写学生代码。
+
+### Session 036 — 2026-10-13（Git pull 后恢复 Windows CPU，接续 C06）
+
+- **恢复依据**：用户说明已 Git pull 并回到 Windows CPU 集显环境；重新读取本地 AGENTS.md、PROGRESS.md 当前状态与最新实际 Session 035、LEARNING_PLAN.md C06/C07 及教学 skill。C01–C05 已通过，C06 未整课通过。
+- **环境实测**：Windows dllab 解释器 C:\Users\wwx\miniconda3\envs\dllab\python.exe，Python 3.11.17、Torch 2.10.0+cpu、CUDA 不可用；本课使用 CPU，不调用集成显卡。
+- **只读与运行**：读取 lessons/06_grad_control.py，确认累积/清理与 detach 已实现，no_grad/inference_mode 尚未实现；本机运行退出码 0，首次梯度 [-9.3333]/[-4]、第二次 [-18.6667]/[-8]、清理后恢复首次结果；原/断图预测均 [1,2,3]，requires_grad 分别 True/False，grad_fn 分别 AddBackward0/None。
+- **接续安排**：保留正确部分，只补 no_grad 和 inference_mode 各自范围内重新前向的数值/图属性对照，以及退出范围后用原参数重新前向确认梯度记录恢复。补讲 with 的缩进范围、恢复先前模式、不清理历史 grad、不追溯改变已有图。
+- **状态**：C06 IN_PROGRESS；剩余核心内容尚未提交，不标记整课通过。完成后集中验收，再安排 C07 联系 A05/A06，不提前开新课。
+- **Git 边界**：修改进度前本地 main 工作区干净；用户 pull 按自述记录，未检查远端或执行同步。
+- **环境变更 / Git commit**：无；未修改学生代码。
+
+### Session 037 — 2026-10-13（C06 补充代码验收，整课通过）
+
+- **开课检查**：重读当前进度与 Session 036、规划 C06，查看学生最新 lessons/06_grad_control.py。
+- **学生实现**：在两个独立 with 范围内分别重新计算 no_grad/inference_mode 预测并打印图属性；退出后重新计算普通预测。保留之前正确实验。
+- **真实运行**：Windows dllab python.exe 运行整个文件，退出码 0；两个范围内预测均为 [1,2,3]、Shape [3]、requires_grad=False、grad_fn=None；退出后 y_new 数值/Shape 相同，requires_grad=True、grad_fn=AddBackward0。既有累积、清理与 detach 输出仍正确。
+- **验收结论**：C06 PASSED，代码可运行并正确体现全部原定核心内容，不追加变体或打印细节关卡。累积/清理与 detach 曾经提示澄清；不宣称全程无提示独立熟练。
+- **可选改进/复习点**：两个不求导观察段及其后仅前向时无需反复清理参数 grad；清理历史数值与控制新运算是否记录图是不同职责。无插值的字符串不需 f 前缀；打印标签小笔误不影响通过。
+- **下一步**：用户请求后开始 C07 Parameter/nn.Module，穿插 A05/A06；本轮不自动推进新课。
+- **环境变更 / Git commit**：无；已自动更新进度，未修改学生代码或同步远端。
+
+### Session 038 — 2026-10-13（C07 开课，联系 Python 类与继承）
+
+- **恢复依据**：重新读取 PROGRESS.md 当前状态与 Session 037、LEARNING_PLAN.md C07/A05/A06；lessons 中没有 C07 文件。用户明确请求进入下一课；沿用本会话已验证的 Windows CPU 环境。
+- **上课前补问记录**：上一轮学生询问每次 backward 是否累积 grad，导师解释重新前向后反向会累积到同一叶子参数，前向不累积，默认不能重复反向同一图；仅为讲解，不新增熟练度证据。
+- **内容与意义**：从散落 Tensor 过渡到可调用、可统一枚举参数的模型，为 C08 优化器铺垫。
+- **讲解**：类/实例/self、__init__ 与继承、super 初始化管理结构；Parameter 是 Tensor 子类，作为 Module 属性自动注册，默认需梯度；普通需梯度 Tensor 不自动注册；forward 写计算，模型调用由 Module 调用机制分派；parameters/named_parameters 的迭代接口。
+- **任务**：学生在 lessons/07_module.py 自建 TinyLinear(nn.Module)，不直接使用 nn.Linear；CPU float32，W 初值 [[1,0],[0,1],[1,1]]、b 初值 [0.5,-0.5]；X=[[1,2,3],[4,5,6]]，目标为 Shape [2,2] 的全零 Tensor。模型计算 XW+b，模块外算 MSE 并反向一次；观察命名参数、预测及参数梯度。
+- **状态**：C07 EXPLAINED；核心验收是参数正确注册、前向正确和参数梯度可获得；不要求训练循环、完整手算或预测注释，未提供可运行实现。
+- **下一步 / 环境变更 / Git commit**：学生手写后集中审阅；无环境变更、代码运行或提交。
+
+### Session 039 — 2026-10-13（C07 首版只读指导，补 Python 函数与类语法）
+
+- **检查依据**：重读进度与 Session 038、规划 A03/A05/A06/C07，并查看 lessons/07_module.py；学生自述遗忘函数/类语法，请求提示。
+- **现有代码**：已写导入、模型类、Parameter 意图、einsum 前向和模块外损失/反向；未执行本次代码，不虚构运行错误。
+- **静态问题**：nn.module 大小写错误；父类初始化与 self.W/b 直接放在类体，未定义 __init__；Parameter 接受 Tensor 数据而非列表及 device/dtype 参数；forward 缺 self、未用 self.W、遗漏偏置与 return；model 指向类而非实例；X 为默认整数，与 float32 权重类型不一致。
+- **提示策略**：用不可执行的结构示意解释 def/冒号/缩进/return、方法的 self 和构造函数；先整理初始化与前向两个方法，再调整 Parameter/实例化/dtype，不提供完整可运行替换。
+- **状态**：C07 IN_PROGRESS，A03/A05/A06 仅补讲不标通过。
+- **下一步 / 环境变更 / Git commit**：学生自行修正后运行；无环境变更或提交，未改写学生代码。
+
+### Session 040 — 2026-10-13（C07 类创建与初始化顺序补讲）
+
+- **检查依据**：重读当前进度、Session 039、A03/A05/A06/C07 规划并只读查看最新 07_module.py；学生反馈继承、初始化与实例方法仍不清楚。
+- **已修正**：先创建 W/b Tensor 再包装 Parameter；forward 已有 self、访问 self.W 并 return 预测；初始化内部代码缩进方向正确。
+- **尚存问题**：__init__ 定义缺 def，父类仍写 nn.module，缺 super().__init__，model 仍指向类而不是实例；前向未加偏置，X 仍默认整数。
+- **补讲方式**：沿定义类→创建实例→自动执行 __init__→Module 父类初始化→实例参数注册→调用模型/forward 的时间线解释；self 指同一个当前实例，super 不创建第二个对象；初始化方法与 forward 的不同调用时机。仅给接口与修改提示，不提供可运行类实现。
+- **状态/下一步**：C07 IN_PROGRESS；先修正结构和实例化，再检查前向偏置与 dtype；本轮未执行或改写学生代码，不新增通过证据。
+- **环境变更 / Git commit**：无。
+
+### Session 041 — 2026-10-13（C07 模型实现验收通过）
+
+- **检查依据**：重读当前进度与 Session 040、规划 C07/C08，并读取最新 lessons/07_module.py；学生报告已成功运行并请求验收。
+- **学生修正**：nn.Module 大小写、def __init__、先 super 初始化再注册 Parameter、forward 使用 self.W/b 并 return、创建 TinyLinear 实例、输入 float32 均正确。
+- **真实验证**：Windows dllab python.exe 通过 runpy 执行学生文件并只读检查模型对象，最终退出码 0；预测 [[4.5,4.5],[10.5,10.5]]、Shape [2,2]、requires_grad=True、grad_fn=AddBackward0；MSE=65.25。首个验证命令因 shell 引号问题未执行学生脚本，修正命令后验证成功。
+- **参数证据**：named_parameters 正确列出 W/b；Shape 分别 [3,2]/[2]、均为叶子；W.grad=[[23.25,23.25],[30.75,30.75],[38.25,38.25]]，b.grad=[7.5,7.5]，符合全元素均方误差解析梯度。
+- **验收结论**：C07 PASSED；学生未打印命名参数/参数梯度，但导师直接检查确认核心行为，不因输出项追加阻塞。函数/类/初始化/实例化曾经过提示，保留依赖记录，A03/A05/A06 不视为整模块验收通过。
+- **可选改进**：学生可用 named_parameters 自行查看参数与梯度；格式及无插值字符串的 f 前缀不影响通过。
+- **下一步 / 环境变更 / Git commit**：用户请求后开始 C08 优化器与训练循环；未修改学生代码、依赖或同步远端。
+
+### Session 042 — 2026-10-13（C08 开课，手写最小训练循环）
+
+- **开课检查**：重读当前进度与 Session 041、规划 C08/B08 及最新 C07 代码；lessons 中尚无 C08 文件，沿用已验证的 Windows CPU 环境。
+- **上一轮答疑事实**：读取并运行含 forward 打印的 C07 文件，确认参数 grad 在首次前向时为 None，requires_grad 为 True；标签和访问属性不一致，学生本轮表示已理解。类外反向后的参数打印已由学生补入，不额外升级熟练度。
+- **讲解**：MSE 平均范围与损失对象调用；SGD 梯度下降和 lr；优化器持有注册参数，创建在循环外；清理、前向、loss、backward、step 的不同职责；step 不自动清理梯度；每轮重新前向，no_grad 仅用于最终评估；item 仅用于日志。
+- **任务**：学生创建 lessons/08_train_linear.py，自建标量线性 Module，叶子 Parameter w=0、b=0；CPU float32，x=[-2,-1,0,1,2]，y=[-3,-1,1,3,5]，预测 wx+b；使用 nn.MSELoss 默认均值与 torch.optim.SGD、lr=0.1，100 次全批量更新。记录初始/最终 loss、第一次更新前后参数和最终预测；最终评估使用 no_grad。任务规模很小，不提供可运行训练代码。
+- **验收目标**：梯度正确驱动已注册参数更新，循环顺序正确，loss 明显下降，最终参数/预测接近目标关系 y=2x+1；不强制预测注释或逐轮手算。
+- **状态**：C08 EXPLAINED；未运行本次任务，不虚构训练结果。
+- **下一步 / 环境变更 / Git commit**：学生手写后集中审阅；无环境变更或提交，未修改学生代码。
 
 ## 7. 后续 Session 模板（复制本段追加，不要覆盖历史）
 

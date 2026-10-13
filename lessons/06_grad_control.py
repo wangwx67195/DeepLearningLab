@@ -54,7 +54,31 @@ loss.backward()
 # print(f"w.grad_fn = {w.grad_fn}")
 # print(f"b.grad_fn = {b.grad_fn}")
 
+w.grad = None
+b.grad = None
 
+with torch.no_grad():
+    y_no_grad = x * w + b
+    print(f"y_o_grad = ", y_no_grad)
+    print(f"y_no_grad.shape = ", y_no_grad.shape)
+    print(f"y_no_grad.requires_grad = ", y_no_grad.requires_grad)
+    print(f"y_no_grad.grad_fn = ", y_no_grad.grad_fn)
+
+w.grad = None
+b.grad = None
+
+with torch.inference_mode(mode = True):
+    y_infer = x * w + b
+    print(f"y_infer = ", y_infer)
+    print(f"y_infer.shape = ", y_infer.shape)
+    print(f"y_infer.requires_grad = ", y_infer.requires_grad)
+    print(f"y_infer.grad_fn = ", y_infer.grad_fn)
+
+y_new = x * w + b
+print(f"y_new = ", y_new)
+print(f"y_new.shape = ", y_new.shape)
+print(f"y_new.requires_grad = ", y_new.requires_grad)
+print(f"y_new.grad_fn = ", y_new.grad_fn)
 
 
 
