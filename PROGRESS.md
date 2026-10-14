@@ -38,12 +38,12 @@
 
 | 字段 | 当前内容 |
 |---|---|
-| 当前主要课程 | `C08` — 损失函数、优化器与最小训练循环，联系 B08 梯度下降 |
-| 实际作业 | 学生实际提交于根目录 `08_train_linear.py`；C01–C07 作业保留在 lessons/ |
-| 作业状态 | C08 `PASSED`（CUDA 实测训练与拟合正确；最终 no_grad 评估留作改进建议）；C09 未开始 |
-| 通过验收的课次 | `C01`、`C02`、`C03`、`C04`、`C05`、`C06`、`C07`、`C08`（不等同于全部内容无需提示的独立熟练） |
+| 当前主要课程 | `C09` — Dataset、DataLoader、batch、shuffle 与默认 collate，联系 A02/A06/A10 |
+| 实际作业 | C09 已验收文件为根目录 `09_dataset_loader.py`；C08 当前文件为 `lessons/08_train_linear.py`，已有作业保留 |
+| 作业状态 | C09 `PASSED`（CPU Dataset、CUDA batch 训练与最终无梯度评估完整运行正确）；C10 未开始 |
+| 通过验收的课次 | `C01`、`C02`、`C03`、`C04`、`C05`、`C06`、`C07`、`C08`、`C09`（不等同于全部内容无需提示的独立熟练） |
 | 当前里程碑 | P-C 之前；长期 P-E 是独立 mini-GPT |
-| 下一个最小动作 | 用户请求后开展 C09 Dataset/DataLoader；C08 最终预测可补 no_grad 与最终损失记录，作为非阻塞改进建议 |
+| 下一个最小动作 | 用户请求后开始 C10 初始化、随机种子与 state_dict；本轮统一 device、整体模型迁移和复用最终预测为可选整理建议，不需重做 C09 验收 |
 
 ## 3. 已讲解但尚未通过的知识
 
@@ -65,7 +65,8 @@
 
 - Python：`import`、对象属性 `.` 的直观用法、索引/切片的最初介绍。
 - Conda / pip：环境创建与激活、依赖隔离的基本概念；此前讲解时的环境名示例与真实环境不同。
-- PyTorch：C08 已通过，梯度下降减号与负梯度导致参数增大的关系本轮补讲，尚无学生独立解释证据；最终 no_grad 评估留作改进。B08 联系梯度下降，不整模块标记通过。C07 类/初始化、C06 梯度模式及 C05 梯度保存需复习；A03/A05/A06、B05 与 B03/B04 未整模块验收。
+- PyTorch：C08 已通过，梯度下降减号与负梯度导致参数增大的关系在 Session 045 补讲，尚无学生独立解释证据；Session 046 静态查看确认已补最终 no_grad 前向，未重跑该修改。B08 联系梯度下降，不整模块标记通过。C07 类/初始化、C06 梯度模式及 C05 梯度保存需复习；A03/A05/A06、B05 与 B03/B04 未整模块验收。
+- PyTorch：C09 已于 Session 051 验收通过；Dataset/loader 协议、解包及设备安排经历多轮提示与修正，不宣称全程无提示独立熟练。整体 Module.to、统一设备配置、注册 buffer 与普通 Tensor 属性区别及可选 pin_memory/non_blocking 为本轮指导，尚无学生改写/测速证据。A02/A06/A10 仅按需联系，不整模块标记通过。
 - 项目结构：项目与模块的初步区别；尚未独立构建完整包。
 
 **不应从上述记录推断：**学生已能独立完成张量运算、Autograd、MLP、Transformer、Diffusion 或 Flow Matching。
@@ -84,6 +85,8 @@
 
 ### 已验收
 
+- C09：根目录 09_dataset_loader.py 已实测完整运行成功，Dataset 长度 5、索引 2 配对 [0]/[1]，loader 长度 3、batch Shape [2,1]/[2,1]/[1,1]；CPU 数据按批迁移 CUDA，100 个 epoch 后 W=2、b≈0.99999988。最终 no_grad 全数据评估 MSE≈5.68434e-15、最大绝对误差≈1.19209e-7。多轮提示依赖保留，非全面独立熟练证据。
+
 - C08：根目录 08_train_linear.py 在 Linux CUDA 环境实测成功；W/b 正确注册，学习率 0.1，100 次全批量更新后 MSE 从 9 降至约 5.68434e-15，参数接近 2/1，预测最大绝对误差约 1.19209e-7。首次梯度 -8/-2，更新后实际为 0.8/0.2；逐轮末尾清理梯度有效。保留讲解提示依赖，不宣称梯度下降公式已独立解释。
 
 - C04：当前 GPU 环境实际运行成功，体现原地修改、切片存储共享、clone 独立副本、变量重新绑定、to 同目标/强制复制/dtype 转换及设备错误修复；学生口头说明 add_ 修改数据而 clone 创建副本，导师补充切片共享存储的联系。按最新验收规则通过，不要求补齐非核心兼容与打印细节。
@@ -94,7 +97,7 @@
 
 ### 待确认
 
-- C08 非阻塞改进：学生第 61 行最终重新前向仍记录计算图，建议置于 no_grad 范围并计算最终损失；导师已另行无梯度评估验证最终拟合。第 18–22 行自定义 Loss 未使用，其 lr 属性不控制优化器；不影响核心验收。实际文件位于根目录，未替学生移动或改写。
+- C08 非阻塞改进更新（Session 046 静态检查）：当前文件已位于 lessons/08_train_linear.py，学生已删除未使用的 Loss 子类，并将最终前向放入 no_grad 范围；未重跑，不新增训练结果证据。尚未单独打印最终重新计算的损失，既有导师评估已确认正确拟合，不阻塞新课。
 
 - C04 可选改进：截至 Session 026 最新实测，无 GPU 时 reshape 被条件跳过，二维切片报错；未证明已经修复，不宣称跨设备代码兼容。缺少跳过提示及 Y_0.device 输出同列为改进项，不阻塞 C05 学习。
 
@@ -542,6 +545,66 @@
 - **验收结论**：C08 PASSED；实现可运行且正确体现损失、梯度与优化器更新，符合核心验收标准，不因输出细节追加关卡。未运行其他课程或大规模训练。
 - **非阻塞建议**：最终第 61 行前向未用 no_grad（requires_grad=True），建议补无梯度评估与最终损失；未使用的 Loss 子类及其 lr 属性不影响实际 SGD 学习率。第 53 行 loss 对应本轮更新前，最后评估应重新计算。
 - **下一步 / 环境变更 / Git commit**：用户请求后开展 C09；已自动更新进度，保留既有更改和历史，无依赖变更、学生代码改写或 Git 同步。
+
+### Session 046 — 2026-10-14（C09 开课，从全批量训练过渡到数据迭代）
+
+- **恢复与已有代码**：用户请求继续学习；重读 AGENTS.md、PROGRESS.md 当前状态与 Session 045、LEARNING_PLAN.md C09 及教学 skill，确认 C01–C08 已通过。只读查看 lessons/08_train_linear.py，确认已移入 lessons、未使用的 Loss 子类已删除、最终前向已有 no_grad；尚无 C09 文件。未替学生修改或执行 C08。
+- **环境查询**：dllab Python 3.11.17、Torch 2.10.0+cu128、Torch CUDA 12.8、CUDA 可用；查询本地 DataLoader 接口，并查阅官方数据加载及训练教程，未修改依赖或下载数据。
+- **讲解内容与意义**：Dataset 管理单样本读取，DataLoader 按索引取样并组 batch，为超出显存的大数据训练及后续图像/文本任务建立数据入口；讲解 __init__/__len__/__getitem__ 与 len/索引调用关系，默认 collate 沿新批次轴堆叠，batch_size/shuffle/drop_last/num_workers/collate_fn 的作用，元组解包与 enumerate，epoch/step 区别及每批次梯度更新。
+- **任务**：学生创建 lessons/09_dataset_loader.py，自建 Dataset 保存 CPU float32 的 X/Y，数值沿用 C08 的五组数据但 Shape 均为 [5,1]；单样本返回配对输入与目标，Shape 均为 [1]。先用 batch_size=2、shuffle=False、drop_last=False、num_workers=0 观察 3 个 batch、Shape [2,1]/[2,1]/[1,1]；训练 loader 设置 shuffle=True，使用默认 collate，无需自写 collate_fn。
+- **训练连接**：沿用学生标量线性模型，初值 w=b=0；模型在 CUDA、优化器在设备准备后创建，MSELoss 与 SGD lr=0.1。每个 batch 在训练循环中迁移 CUDA，再清理梯度/前向/损失/反向/更新；100 个 epoch，每 epoch 3 次更新，共 300 次。初始/最终用全部五组数据评估，最终放在 no_grad 范围。模型/优化器不在 epoch 或 batch 内重新创建；不要求各批次 loss 单调下降。
+- **验收目标与状态**：C09 EXPLAINED，未提交或运行作业；核心为自定义数据集取样正确、输入目标配对、默认分批与 Shape 正确、batch 真正接入训练并拟合目标关系。不要求手算预测注释、自定义 collate、额外大数据或多进程实验，不因非核心输出细节反复阻塞。
+- **下一步 / 环境变更 / Git commit**：学生先实现 Dataset 与有序 batch 观察，再完成训练并集中提交；保留已有工作区更改，未写入作业代码或执行 Git 同步。
+
+### Session 047 — 2026-10-14（C09 首版审阅，分步提示数据集与循环修正）
+
+- **恢复与文件**：重读当前进度、Session 046、C09 规划、指导与教学 skill；学生草稿为根目录 09_dataset_loader.py，未改写或移动学生代码。
+- **正确部分（静态）**：X/Y 的五组数值及预期 Shape [5,1] 正确，float32/CPU 意图正确；线性 Module 的父类初始化、参数注册、前向关系正确，模型与优化器创建意图在循环外，保留了反向/更新/末尾清梯度。
+- **真实运行**：/home/wwx/anaconda3/envs/dllab/bin/python 09_dataset_loader.py，退出码 1；第 4 行报 TypeError: tensor() got an unexpected keyword argument 'divice'。脚本尚未执行到数据集、loader 或训练，不能记录拟合结果；未安装依赖。
+- **静态待修问题**：第 4/5 行 divice 应为 device；第 7 行直接调用 Dataset(X,Y)，未定义初始化/长度/索引协议；第 11 行 Dataloader 未定义且大小写不正确，droplast 关键字应为 drop_last；第 27 行 parameter 应为 parameters；第 32 行遍历 len(loader) 的整数，未取到 batch；第 34/35 行仍用完整 X/Y，未使用当前批次。当前模型与数据均 CPU，未完成本次 CUDA batch 迁移安排。
+- **指导策略**：先修 API 名称并自建 Dataset 子类，通过文字与接口说明保存 self.X/Y、按样本轴返回长度、同索引取输入和目标；再直接遍历 loader、解包 batch，观察有序 2/2/1 分批。最后在 CUDA 模型准备后创建优化器，将每批数据迁移 CUDA，使用 batch 计算预测与损失并更新；保留正确的末尾清梯度写法。补初始/最终全数据损失与 no_grad 评估，用于观察拟合。
+- **状态与下一步**：C09 IN_PROGRESS；当前最小任务为数据集与 loader 取样修正，再完善原定训练任务。不提供完整类或训练循环答案，不额外增加预测注释/手算关卡。
+- **环境变更 / Git commit**：无；保留已有更改，仅自动维护进度。
+
+### Session 048 — 2026-10-14（C09 第二版审阅，区分长度整数与 loader 迭代）
+
+- **恢复与文件**：重读当前进度与 Session 047、C09 规划、指导及教学 skill；只读查看根目录 09_dataset_loader.py，保留学生代码和既有更改。
+- **已修正（静态证据）**：device、DataLoader/drop_last、parameters 拼写正确；学生已实现 Dataset 子类，__init__ 保存 self.X/Y，__getitem__ 使用同一 idx 返回配对输入和目标；模型结构和末尾清梯度仍正确。
+- **真实运行**：dllab 解释器执行学生文件，退出码 1；第 20 行 len(dataset) 调到第 13 行 len(self.X.shape[0])，报 TypeError: object of type 'int' has no len()。尚未执行到 loader 或训练，无批次及拟合运行结果。
+- **主要提示**：self.X.shape[0] 已是整数 5，__len__ 应直接返回样本数，或对 Tensor 本身求 len；DataLoader 支持迭代取批次，不能用 loader[load] 索引。区分 dataset[idx] 取单样本、len(loader) 返回批次数、遍历 loader 得到真实 batch；内层循环将 batch 解包成输入和目标，预测用当前输入，损失用当前目标，不能继续用完整 Y。
+- **剩余原定任务**：先观察 2/2/1 分批及 Shape [2,1]/[2,1]/[1,1]；再在优化器创建前迁移模型到 CUDA，每批输入/目标使用 to 返回值迁移同设备；补初始/最终全数据损失与 no_grad 评估。无需改写正确的模型或末尾 zero_grad。
+- **状态与下一步**：C09 IN_PROGRESS；最小动作是修正长度和真实 batch 迭代/目标，学生自行补全，不提供完整类或训练循环答案。
+- **环境变更 / Git commit**：无；仅更新进度，未改变依赖、移动文件或同步 Git。
+
+### Session 049 — 2026-10-14（C09 第三版审阅，明确模型/批次的设备迁移）
+
+- **恢复与文件**：重读当前进度与 Session 048、规划 C09、指导与教学 skill，查看根目录 09_dataset_loader.py；未改写学生代码。
+- **已修正**：__len__ 改为 len(self.X)；内层使用 enumerate(loader)，把 batch_data 解包为 x_batch/y_batch，预测与损失均使用当前批次；最终前向已放入 no_grad。后四项为静态证据，尚未运行到这些位置。
+- **真实运行**：dllab Python 执行学生文件，退出码 1；长度输出 5，dataset[2] 输出 (tensor([0.]), tensor([1.]))，loader 长度 3；第 42 行 loader.to("cuda") 报 AttributeError: 'DataLoader' object has no attribute 'to'。训练尚未执行，无参数拟合证据。
+- **提示**：DataLoader 是迭代取数据的对象，没有 to/device；统一指定目标 CUDA 设备，对模型与每批输入/目标 Tensor 迁移。先迁移模型再创建优化器；在第 48 行解包后、前向前迁移 x_batch/y_batch 并使用返回值，Dataset 数据仍留 CPU。第 62 行最终 model(X) 的 X 也需要使用同设备版本，no_grad 不自动迁移数据。
+- **结果观察建议**：训练前后可比较全部五组数据的损失与参数/预测；不要求重写正确的数据集、解包或梯度清理，也不增加变体关卡。
+- **状态与下一步**：C09 IN_PROGRESS；学生修正模型/批次/最终评估的设备安排后提交验收。
+- **环境变更 / Git commit**：无；仅自动更新进度并保留历史，未同步 Git 或改变依赖。
+
+### Session 050 — 2026-10-14（C09 第四版训练成功，修正最后全数据评估设备）
+
+- **读取与文件**：重读当前进度与 Session 049、规划 C09、指导及教学 skill，查看根目录 09_dataset_loader.py；未改写学生代码。
+- **学生修改**：模型初始化中 W/b Tensor 已在 CUDA，再包装 Parameter 并创建优化器；移除 loader.to/device，用 enumerate 解包 batch 后，分别接住 x_batch/y_batch.to 的返回值。Dataset 中完整 X/Y 保持 CPU。
+- **真实运行**：dllab Python 通过 runpy 执行学生文件，Torch 2.10.0+cu128、CUDA 12.8 可用。长度 5、索引 2 输入/目标 [0]/[1]、loader 长度 3；前三个 epoch 输出显示每轮 2/2/1 分批，输入目标保持配对，均在 cuda:0。100 个 epoch 的训练已执行完毕；第 61 行 model(X) 报 RuntimeError（cuda:0 与 cpu 不一致），验证进程退出码 1。
+- **训练结果诊断**：从异常发生时的脚本对象只读检查，W=2.0、b=0.9999998807907104，均在 cuda:0；最终 batch 输入/目标 Shape [1,1]，Dataset X/Y 仍 CPU。导师另行在 no_grad 中用同设备完整输入/目标评估，最终 MSE=5.684341970784096e-15，预测接近 [-3,-1,1,3,5]；此为导师诊断结果，不宣称学生最后打印成功。
+- **唯一当前运行阻塞与提示**：第 61 行使用完整 X，未使用已经迁移的 x_batch；两者为不同 Tensor，迁移 batch 不自动迁移完整数据。最终评估对完整 X 取得 CUDA 版本并使用返回值，若计算最终损失，完整 Y 同样迁移；no_grad 只控制图记录。保留正确的取样、batch 训练和参数更新，不额外添加验收关卡。
+- **验收状态与下一步**：数据加载与小批量训练核心部分已验证，整课 C09 IN_PROGRESS，待学生修正最后评估设备，使原文件完整运行后复验。参数/损失打印为可选观察建议，不新增阻塞项。
+- **环境变更 / Git commit**：无；仅自动维护进度，未移动文件、改依赖或同步 Git。
+
+### Session 051 — 2026-10-14（C09 整课通过，指导代码简化与整体模型迁移）
+
+- **恢复与提交**：用户请求验收并指导简化/设备迁移；重读当前进度、Session 050、规划 C09、指导及教学 skill，查看根目录 09_dataset_loader.py，保留学生作者身份与代码。
+- **学生修正**：最终 no_grad 范围中取得完整 X/Y 的 CUDA 版本 X_eval/Y_eval，打印最终预测并重新计算最终损失，原定最后设备错误已修复。
+- **真实运行**：dllab Python 通过 runpy 执行整个文件并只读检查，退出码 0；Torch 2.10.0+cu128、CUDA 12.8 可用。Dataset 长度 5、索引 2 返回 [0]/[1]、loader 长度 3；前三个 epoch 的输出显示打乱后仍输入目标配对、CUDA batch 大小 2/2/1；额外只读遍历确认 Shape 均为 [2,1]/[2,1]/[1,1]，Dataset X/Y 保持 CPU。
+- **拟合与评估证据**：100 个 epoch 后注册叶子参数 W=2.0、b=0.9999998807907104，均 cuda:0；最终预测接近 [-3,-1,1,3,5]，MSE=5.684341970784096e-15，final_loss.requires_grad=False，最大绝对误差=1.1920928955078125e-7。
+- **验收结论**：C09 PASSED，数据集、默认 collate、shuffle 配对、小批量梯度更新、设备安排及最终评估均正确，不追加打印/格式/手算关卡；保留之前取样协议、解包、迁移等多轮提示记录。
+- **优化指导**：澄清当前 to 调用已按整个 Tensor 迁移，并非逐标量；建议模型类中常规创建注册参数，实例创建后用 Module.to(device) 统一递归迁移参数/注册 buffer，再创建优化器。统一目标设备，batch 仍按 Tensor 迁移；普通 Tensor 属性与外部输入不自动随模型移动。可用 zeros 简化零初始化、循环变量嵌套解包、保存一次最终预测供打印与损失复用。模型整体 to 简化管理，不代表所有参数合为一次物理拷贝；较大数据可研究 loader pin_memory 与 Tensor.to non_blocking，实际加速需测量，本轮未做测速或改写。
+- **下一步 / 环境变更 / Git commit**：用户请求后进入 C10，简化建议为可选改进；自动更新进度，无学生代码/依赖修改或 Git 同步。
 
 ## 7. 后续 Session 模板（复制本段追加，不要覆盖历史）
 

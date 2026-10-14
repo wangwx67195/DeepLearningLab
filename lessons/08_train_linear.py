@@ -15,12 +15,6 @@ class Linear_model(nn.Module):
 
         return y_hat
 
-class Loss(nn.MSELoss):
-    def __init__(self):
-        super().__init__()
-
-        self.lr = 0.1
-
 x = torch.tensor([-2.,-1.,0.,1.,2.], device = "cuda:0", dtype = torch.float32)
 y = torch.tensor([-3.,-1.,1.,3.,5.], device = "cuda:0", dtype = torch.float32)
 
