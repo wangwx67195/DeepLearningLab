@@ -23,7 +23,7 @@
 - 已实测解释器：`C:\Users\wwx\miniconda3\envs\dllab\python.exe`；Python `3.11.17`；PyTorch `2.10.0+cpu`；`torch.cuda.is_available()` 为 False。
 - 未修改依赖；Session 031 已在本机成功运行 C05，Session 036 已运行 C06 现有累积/清理与 detach 部分成功；未在本机重跑 C04。
 
-### 当前 Windows 设备（2026-10-14 Session 052 验证）
+### Windows 设备历史（2026-10-14 Session 052 验证）
 
 - 项目根目录：`C:\Github\projects\DeepLearningLab`。
 - 已实测解释器：`C:\Users\wwx\miniconda3\envs\dllab\python.exe`；Python `3.11.17`；PyTorch `2.10.0+cpu`；`torch.cuda.is_available()` 为 False。
@@ -40,16 +40,23 @@
 - 运行验证：`dllab` 的 Python 路径为 `/home/wwx/anaconda3/envs/dllab/bin/python`；Torch CUDA 为 `12.8`，CUDA 可用，GPU 为 NVIDIA RTX PRO 6000 Blackwell Workstation Edition；作业中的小张量转换成功。
 - 环境备注：当前 Agent shell 未激活环境，使用 `conda run -n dllab python`；Torch 导入提示缺少 NumPy，本次作业执行成功，未修改依赖。
 
+### 当前 Ubuntu 设备（2026-10-14 Session 063 验证）
+
+- 系统实测：Ubuntu 22.04.5 LTS；项目为 ~/projects/DeepLearningLab/。
+- 解释器：/home/wwx/anaconda3/envs/dllab/bin/python，Python 3.11.17；Torch 2.10.0+cu128、Torch CUDA 12.8，CUDA 可用。
+- GPU：NVIDIA RTX PRO 6000 Blackwell Workstation Edition，计算能力 12.0；当前 PyTorch 支持架构列表包含 sm_120。
+- 实际 CUDA 小运算成功：GPU 上 [1,2] 逐元素平方求和，结果为 5.0。本轮只验证环境，不将 Windows 作业验收描述为当前设备的再次执行；Torch 导入提示缺少 NumPy，未改变依赖。
+
 ## 2. 本阶段当前位置
 
 | 字段 | 当前内容 |
 |---|---|
-| 当前主要课程 | `C11` — CPU 调试、数值/梯度检查、内存估算与基准计时；CUDA 专属实践待相应设备 |
-| 实际作业 | C11 学生当前草稿为 `lessons/11_debug_check.py`（采用学生实际文件名）；C10 已通过文件为 `lessons/10_state_dict.py`；已有作业保留 |
-| 作业状态 | C11 `PASSED`（当前 CPU 范围），完整脚本计算/梯度/存储/计时正确；Timer 的名称查找与作用本轮继续补讲，CUDA 专属实践未完成 |
-| 通过验收的课次 | `C01`、`C02`、`C03`、`C04`、`C05`、`C06`、`C07`、`C08`、`C09`、`C10`、`C11`（C11 为 CPU 范围；不等同于全部内容无需提示的独立熟练） |
+| 当前主要课程 | C11 CUDA 补充：显存分配/缓存与 GPU 计时，同时核对 P-C 模式概念 |
+| 实际作业 | `lessons/11_debug_check.py` CPU 实验与 `lessons/11_cuda_check.py` CUDA 补充均已通过；C10/C09 既有作业保留 |
+| 作业状态 | C11 CPU 与本次 CUDA 核心补充均 `PASSED`；P-C 模式概念的学生解释仍待确认 |
+| 通过验收的课次 | `C01`、`C02`、`C03`、`C04`、`C05`、`C06`、`C07`、`C08`、`C09`、`C10`、`C11`（含本次 CUDA 核心补充；不等同于全部内容无需提示的独立熟练或所有工具均已实践） |
 | 当前里程碑 | P-C 之前；长期 P-E 是独立 mini-GPT |
-| 下一个最小动作 | 本轮补讲 globals 名称查找、stmt 函数调用与 Timer 测量含义；用户请求继续时按 P-C 核对已有成果，不自动推进 D 阶段 |
+| 下一个最小动作 | C11 最新脚本已通过提交前复验，学生可将作业与更新文档一起提交同步；后续用自己的话说明 eval 与 no_grad 的区别，集中完成 P-C 核对 |
 
 ## 3. 已讲解但尚未通过的知识
 
@@ -69,7 +76,7 @@
 
 ### 尚未完整验收的内容
 
-- PyTorch：C11 已在 Session 062 通过当前 CPU 范围。函数、gradcheck 与 Timer 经多轮提示修正，学生本轮仍询问 globals/stmt 括号区别与计时用途，补讲不等于已独立解释，不追加验收关卡；detect_anomaly 未实践，CUDA 监测/显存/同步计时待设备补实践。B05 数值导数仅联系，不整模块标记通过。
+- PyTorch：C11 CPU 范围与 CUDA 核心补充分别在 Session 062/066 通过。函数、gradcheck、Timer 及引用解除经多轮提示修正，不等同于独立熟练；detect_anomaly 未实践。Session 068 已确认 synchronize 移到删除 C 后、显存快照前，最新文件完整运行正确；同步含义在 Session 067 补讲，尚无学生独立解释证据。Timer 自带同步，计时有效。B05 数值导数仅联系，不整模块标记通过。
 - PyTorch：C10 已通过；初始化种子与共享参数经历提示、解释和修正，非无提示全面熟练。当前纯线性模型未调用 eval，但不改变本模型输出，不作为通过阻塞；原模型重新装载自身权重为可选简化项。Python 字典和路径仅按需联系，不整模块验收。
 - Python：`import`、对象属性 `.` 的直观用法、索引/切片的最初介绍。
 - Conda / pip：环境创建与激活、依赖隔离的基本概念；此前讲解时的环境名示例与真实环境不同。
@@ -92,6 +99,8 @@
 ## 5. 掌握证据与待补修点
 
 ### 已验收
+
+- C11 CUDA 补充：Session 066 完整脚本退出码 0；A/B 为 CUDA float32 [512,512]、不求导，矩阵输出有限（导师另行检查）；del C 后不再保留旧 C 名称，globals 仅映射 A/B，Timer 与 Measurement 正确，0.2 秒短测得到本轮 median≈13.475 µs/次。显存 allocated 减少 1048576 字节，删除与清缓存合并观察下 reserved 也减少；不宣称已单独测定每个操作的作用。
 
 - C11（CPU 范围）：`lessons/11_debug_check.py` 已完整运行成功，有限性 True、gradcheck True、X 元素存储 40 字节；此前导师验证 shape 断言有效。globals 正确映射函数对象及参数，blocked_autorange 返回 Measurement 并读取 median；Session 062 单次中位数约 38.07 微秒，报告测量波动较大，不记录为稳定性能结论。保留提示依赖与 CUDA 未实践限制。
 
@@ -706,6 +715,62 @@
 - **补讲重点**：字典字符串键允许含括号，并非 Python 禁止；当前 stmt 解析的是名称 loss_for_check，需在 globals 中查到同名函数，然后解析括号执行调用并传 w/b。区分名称字符串、函数对象和调用结果。Timer 是测量给定操作执行时间的工具；构造时提供任务与可用对象，blocked_autorange 才执行预热、分组重复测量并返回统计结果，组耗时除以组内次数归一化到每次调用。当前范围为预测/shape 检查/MSE 与 Autograd 建图，不含 backward/gradcheck/打印，也不更新参数；min_run_time=0.2 是测量阶段累计时间下限，不是每次函数耗时。
 - **结论与理解限制**：C11 PASSED（当前 CPU 核心范围），不因补充理解问题追加关卡；学生尚未自行解释 Timer/名称映射，保留多轮提示依赖，不称全面熟练。CUDA 与 anomaly 实践限制保留。
 - **下一步 / 环境 / Git**：本轮专注回答用户概念问题，不自动推进下一章；用户请求继续时核对 P-C 现有成果。自动维护进度，未修改作业或依赖，未同步 Git。
+
+### Session 063 — 2026-10-14（pull 后恢复 Ubuntu CUDA，核对 P-C 并补 C11 GPU 实践）
+
+- **恢复依据**：用户说明已 Git pull、当前 Ubuntu 22.04/CUDA 12.8；重新读取 AGENTS.md、教学 skill、进度当前位置与最近 Session 062、规划 C11/P-C，确认 C01–C10 已通过、C11 CPU 已通过，不能依据旧聊天重新开展 C10。本地 main 工作区在记录修改前干净，未检查远端或执行同步。
+- **只读代码核对**：查看 lessons/09_dataset_loader.py、10_state_dict.py、11_debug_check.py；已有手写线性 Module/MSE/SGD、数据加载、参数保存恢复和 CPU gradcheck/Timer 成果。C09/C10 当前设备变量仍 CPU，保留正确成果，不要求重写；尚无 11_cuda_check.py。未运行会保存模型的 C10 脚本或重跑既有验收。
+- **环境证据**：Ubuntu 22.04.5 LTS；dllab Python 3.11.17、Torch 2.10.0+cu128、CUDA 12.8、CUDA 可用；GPU RTX PRO 6000 Blackwell，计算能力 12.0，PyTorch 架构列表含 sm_120；GPU [1,2] 平方求和结果 5.0。仅环境小运算与 API 查询，未执行学生 GPU 实验或安装依赖。
+- **P-C 核对**：手写 Linear/MSE/SGD 的代码与历史验收证据已具备，不另布完整训练项目。本轮补讲 train/eval 控制特定层行为与 training 标志、no_grad 控制新运算的图记录；本线性模型两种模式公式相同，eval 不关闭参数求导。学生独立解释尚待确认，不标记 P-C 完整通过。
+- **GPU 内容与用途**：讲解 Tensor 元素存储与 memory_allocated/memory_reserved 的区别、缓存复用及 empty_cache 仅释放未使用缓存；CUDA 异步提交与 synchronize 的计时意义；复用 Timer 的预热/同步/Measurement，区分 GPU 计算计时与数据传输或整轮训练。查阅官方 CUDA/benchmark/Module 文档与本地接口，不提供可运行完整实现。
+- **任务**：学生另建 lessons/11_cuda_check.py；创建两个 Shape [512,512] 的 CUDA float32、requires_grad=False Tensor，矩阵乘法生成 C，观察 Shape/device/数值有限性。记录创建前、A/B/C 存活时、释放 C 并同步后、一次 empty_cache 后的 allocated/reserved，估算单 Tensor 元素存储为 1 MiB；不要求统计严格等于估算。保留 A/B，用 Timer 对 GPU 上矩阵乘法做 min_run_time=0.2 的短测，globals 映射 A/B Tensor 对象，读取 Measurement/median（秒），输入创建/迁移/打印与显存查询在计时外；不规定速度门槛或重复 gradcheck。
+- **状态与下一步**：C11 CPU 保持 PASSED，GPU 补充 EXPLAINED、未运行/未提交；学生提交实验并解释 eval/no_grad 后集中核对 P-C，暂不进入 D。同步补充 LEARNING_PLAN，保留全部历史及学生文件。
+- **环境变更 / Git commit**：无；自动维护文档，未改写学生作业、保存模型、改变依赖或同步 Git。
+
+### Session 064 — 2026-10-14（C11 CUDA 首版审阅：Timer 位置参数与对象引用）
+
+- **读取与文件**：重读指导、教学 skill、当前位置与 Session 063、规划 CUDA/P-C；查看学生 lessons/11_cuda_check.py，未改写代码或创建完整答案。
+- **正确部分与运行证据**：dllab Python 执行学生文件，退出码 1。CUDA 上 A/B 矩阵乘法成功，C Shape [512,512]；三个字节打印均为 1048576（但第 17/18 行误重复读取 A，真实 B/C 表达式待修）。初始 allocated/reserved 均 0；计算后为 11665408/25165824，活跃 A/B/C 未释放时调用 empty_cache，数值均未变化。本轮观察不推广为固定显存要求。
+- **实际阻塞**：第 28 行 Timer 的第二个位置实参 global_dict 被当成 setup，内部对其按字符串处理，报 TypeError: expected string or bytes-like object, got 'dict'。尚未执行 blocked_autorange，无计时结果。
+- **修改提示（后续更正见 Session 065）**：通过 globals 关键字传映射字典；本轮曾误提示 torch.matmul 还需显式映射 torch，Session 065 核查本机源码确认 Timer 默认已提供 torch，因此此项不是必要修改。C 是输出，不需作为输入放入 globals；移除该引用也便于释放 C 后做显存实验。保留现有 Measurement/median 接收，补结果打印。
+- **原定核心补充**：现在 empty_cache 时 C 仍活跃，尚未观察释放输出后 allocated 与 reserved 的变化。先解除 C 引用并同步，再记录，随后一次 empty_cache 并再记录；A/B 留用于计时。补 C 的 device/有限性观察，不要求新增变体、预测注释、固定显存数值或速度门槛。字节计算各自使用对应 Tensor 为非阻塞小改进；创建随机 Tensor 时直接指定 device 可省 CPU 临时 Tensor。
+- **状态与下一步**：C11 CPU 保持 PASSED，CUDA IN_PROGRESS；最小动作是 Timer 参数/名称映射与释放输出实验，P-C 的模式解释仍未收到。自动记录实际证据，不代写实现。
+- **环境变更 / Git commit**：无；保留已有修改，未改变依赖、同步 Git 或执行长时间 GPU 任务。
+
+### Session 065 — 2026-10-14（详细补讲 Timer 参数与 C 的引用解除，纠正默认命名空间提示）
+
+- **读取与学生请求**：学生要求详细说明当前代码中 Timer 怎样创建、怎样解除 C 引用；重读进度与 Session 064、规划 CUDA 任务、指导与教学 skill，查看未变的 lessons/11_cuda_check.py。未重跑已知错误脚本或代写完整实现。
+- **核查与纠正**：查看本机 PyTorch 2.10 Timer.__init__ 源码，确认 self._globals = dict(globals or {})，并默认 setdefault("torch", torch)。更正上轮关于必须显式提供 torch 的提示；当前字典仅需 A/B 输入映射，torch 默认已提供。实际运行阻塞仍是把字典作为第二个位置实参传给 setup，而非 globals。
+- **详细讲解**：用接口与参数表区分 stmt 的延迟执行字符串、setup 的准备语句、globals 的名称到实际对象映射、num_threads 的 CPU 线程含义。结合现有字符串说明 C 为赋值输出、A/B 为输入；globals 键为字符串、值为真实 Tensor，不是名字字符串或计算结果。创建 Timer 只配置任务，blocked_autorange 才测量并返回 Measurement，median 为每次调用中位耗时秒值；不提供可复制的完整 Timer/实验答案。
+- **引用与顺序**：解释变量 C 和字典值可以指向同一个 Tensor，字典不复制数据；del 删除名称绑定或字典条目，不保证尚有其他引用时释放对象。Timer 复制字典但保留相同对象引用，所以建议先完成 C 的存储/数值观察，解除 C 名称引用、同步、记录显存、一次 empty_cache 后再记录，最后创建不含 C 的 A/B 映射与 Timer。删除后不能继续用原 C 名称；计时字符串中重新计算输出不需要旧 C。
+- **状态与下一步**：C11 CPU PASSED、GPU IN_PROGRESS 保持，解释不等同于学生已经修改或运行；下一步由学生修正参数传递与实验顺序后集中验收，不加新关卡。
+- **环境变更 / Git commit**：无；仅查接口/源码与官方文档、自动维护记录，未改学生文件或同步 Git。
+
+### Session 066 — 2026-10-14（C11 CUDA 补充验收通过，记录实验完善建议）
+
+- **读取与学生修改**：重读当前进度与 Session 065、CUDA 规划、指导及教学 skill；学生 lessons/11_cuda_check.py 已在创建计时字典前 del C，字典只含 A/B，Timer 通过 globals 关键字接收，stmt 重新执行矩阵乘法，打印 median。未改写学生文件。
+- **真实运行**：dllab Python 通过 runpy 完整执行脚本并只读检查，退出码 0；A/B 为 cuda:0、float32、Shape [512,512]、requires_grad=False；原 C 名称不再存在，global_dict 仅含 A/B。矩阵计算与 GPU 计时运行成功；导师另行用 A/B 计算输出并检查 isfinite.all=True，不虚构学生已有有限性打印。
+- **显存证据**：创建前 allocated/reserved=0/0；A/B/C 存在时为 11665408/25165824 字节；执行 del C 和一次 empty_cache 后为 10616832/23068672，allocated 减少 1048576（1 MiB）。当前脚本没有记录这两个操作之间的中间状态，不能将两种统计变化分别归因；数字仅为本轮观测。
+- **计时证据**：blocked_autorange(min_run_time=0.2) 成功，median=1.347516500391066e-05 秒，约 13.475 微秒/次，number_per_run=1000；不把本轮结果当作固定速度或全 GPU 性能指标。Timer 自带必要同步，当前计时不因未手写 synchronize 而无效。
+- **验收结论**：C11 CUDA 核心补充 PASSED，引用解除、显存查询/缓存调用及短时 GPU 测量正确体现本节内容，符合运行正确且体现核心的验收标准。保留提示依赖，未要求输出细节反复往返。
+- **非阻塞改进**：del C 后、empty_cache 前增加一次 synchronize 与 allocated/reserved 记录，以单独观察释放 Tensor 与清缓存；第 17/18 行字节计算仍重复使用 A，尺寸相同使本轮数值相同，建议各用对应 B/C。直接在 CUDA 创建随机 Tensor、移除未使用 nn 导入也为可选整理。不要求新的错误变体、手算或基准速度。
+- **下一步 / 环境 / Git**：P-C 训练代码与 C11 核心已有验收，学生尚未回答模式概念，下一最小任务为解释 eval 与 no_grad；本轮不自动进入 D。仅自动维护进度，无学生代码或依赖修改、Git 同步。
+
+### Session 067 — 2026-10-14（C11 CUDA 修改复验通过，讲解 GPU 同步与放置位置）
+
+- **恢复与修改**：重读进度与 Session 066、CUDA 规划、指导及教学 skill；查看 lessons/11_cuda_check.py。学生已在 del C 后、empty_cache 前增加显存快照，并添加 torch.cuda.synchronize(gpu)；同步位于该快照之后。Timer 配置保持正确，未改写学生文件。
+- **真实运行与验收**：dllab Python 完整执行脚本，退出码 0，C Shape [512,512]；CPU 与 CUDA 核心 PASSED 保持，不追加验收关卡。本轮 median=1.2828152510337533e-05 秒（约 12.828 微秒/次），不宣称固定速度。
+- **分阶段显存证据（字节）**：创建前 allocated/reserved=0/0；A/B/C 存在时=11665408/25165824；仅 del C 后=10616832/25165824；随后同步与 empty_cache 后=10616832/23068672。当前运行体现释放输出时 allocated 减少 1 MiB、reserved 保持，清缓存后 reserved 减少 2 MiB，仍保留活跃内存；只记录本轮观测，不要求固定数值。
+- **同步讲解**：CUDA 运算常异步提交，Python 执行到下一行并不保证 GPU 已完成；synchronize(device=None) 让调用线程等待指定设备上此前提交的工作完成，默认当前 CUDA 设备，返回 None。本节现有 synchronize(gpu) 已是实现；若希望显存快照发生在完成计算后，将第 27 行移动到 del C 后、显存打印前。内存统计读取分配器状态，不等于读取计算结果，并非每次查询必须同步；该建议是建立清晰实验边界，不影响当前验收。
+- **使用场景与限制**：手动计时在开始记录前同步排除旧工作，提交待测运算后同步再记录结束；benchmark.Timer 已自动处理必要同步，无需将同步写进每次待测运算。同步不解除 Tensor 引用或清理缓存；常规单流依赖由执行顺序保证，无需在每次训练计算后强制同步。第 17/18 行字节计算重复 A 仍为可选整理，不阻塞。
+- **下一步 / 环境 / Git**：P-C 的学生模式解释仍待确认；仅自动维护进度，未修改学生代码、依赖或同步 Git。
+
+### Session 068 — 2026-10-14（C11 提交前复验通过，同步位置已调整）
+
+- **读取与修改**：重读指导、教学 skill、进度与 Session 067、CUDA 规划及最新 lessons/11_cuda_check.py；学生已将 synchronize(gpu) 移到 del C 后、allocated/reserved 查询前，其他核心逻辑保持正确。
+- **真实执行**：dllab Python 执行完整文件，退出码 0；矩阵 Shape [512,512]，单矩阵元素存储打印为 1048576 字节。创建前 allocated/reserved=0/0；创建后=11665408/25165824；删除 C 并同步后=10616832/25165824；empty_cache 后=10616832/23068672。Timer 成功，本轮 median=1.2912216596305371e-05 秒（约 12.912 微秒/次）。
+- **验收结论**：C11 最新脚本 PASSED，可提交当前学习成果，未增加验收关卡。第 17/18 行字节计算仍重复引用 A，因同 Shape/dtype 本轮输出相同，留作非阻塞小改进；不改写学生代码。
+- **记录与交接**：同步位置待调整项已关闭；P-C 模式概念解释仍待学生确认，不把提交前复验升级为 P-C 完整通过。建议学生将 lessons/11_cuda_check.py、PROGRESS.md、LEARNING_PLAN.md 一起提交；导师未执行 Git commit/push 或修改依赖。
 
 ## 7. 后续 Session 模板（复制本段追加，不要覆盖历史）
 

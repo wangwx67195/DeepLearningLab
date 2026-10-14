@@ -216,6 +216,8 @@ DeepLearningLab/
 
 **C11 当前设备安排（2026-10-14）**：Windows CPU 环境先集中学习 traceback/shape 检查、非有限数值、Tensor 存储大小、有限差分与 gradcheck、CPU 小规模基准计时。综合练习使用已有线性回归公式，不重复训练/保存流程；CUDA 监测、显存分配与缓存及 GPU 异步计时在具备 CUDA 设备时补实践，不能由 CPU 作业推断已掌握。通过聚焦当前环境的核心调试与检查能力，不要求制造大量错误或长时间性能实验。
 
+**C11 CUDA 补充与 P-C 核对（2026-10-14，恢复 Ubuntu 22.04/CUDA 12.8）**：保留 C11 CPU 通过及既有训练成果。P-C 的手写 Linear/MSE/SGD 已有 C08–C10 验收证据，补讲并确认 train/eval 与 no_grad 的区别，不要求另写完整训练项目。学生另建 `lessons/11_cuda_check.py`，用两个 512×512 CUDA float32、无需梯度的 Tensor 做一次矩阵乘法；观察张量存储大小、memory_allocated/memory_reserved、释放输出与一次 empty_cache 的变化，再用已有 Timer 做短时 GPU 计算基准，理解异步执行与同步。验收聚焦正确含义与可运行实验，不要求特定显存数值或速度、不重复 CPU gradcheck；完成后集中核对 P-C，再由用户请求进入 D 阶段。
+
 **验收项目 P-C**：只使用小规模 Tensor，自己写 `Linear` → `MSE` → `SGD` 最小训练流程；梯度与 loss 正确；解释 `model.train()` 与 `model.eval()` 的含义。
 
 **C02 组织调整（2026-10-12，学生明确请求）**：将维度操作作为一个整体，按“增删单例轴 → 重组形状 → 交换/重排轴 → stride、连续性与 view/reshape”建立统一对照。已通过部分简短串联，剩余 permute 与 view/连续性合并讲解；集中布置一个综合练习、一次运行核对多个结果。学生仍亲手编写核心代码，理解确认并入综合验收，不逐 API 重复运行。后续课程沿用相关概念成组、集中验收的方式。
