@@ -5,6 +5,7 @@ X = torch.tensor([[-2.],[-1.],[0.],[1.],[2.]], device = "cpu", dtype = torch.flo
 Y = torch.tensor([[-3.],[-1.],[1.],[3.],[5.]], device = "cpu", dtype = torch.float32)
 
 gpu = "cuda:0"
+cpu = "cpu"
 
 class Dataset(torch.utils.data.Dataset):
     def __init__(self,X,Y):
@@ -38,7 +39,7 @@ class Linear(nn.Module):
         return Y_hat
 
 model = Linear()
-model.to(device = gpu)
+model.to(device = cpu)
 print(next(model.parameters()).device)
 
 optimizer = torch.optim.SGD(model.parameters(), lr = 0.1)
@@ -47,9 +48,7 @@ Loss_fn = nn.MSELoss()
 for epoch in range(100):
 
     for idx, batch_data in enumerate(loader):
-        x_batch, y_batch = batch_data
-        x_batch = x_batch.to(device = gpu)
-        y_batch = y_batch.to(device = gpu)
+        x_batch, y_batch = batch_data[0].to(device = cpu), batch_data[1].to(device = cpu)
 
         if epoch < 3:
             print(f"Epoch {epoch}, load {idx}, input = {x_batch}, target = {y_batch}")
@@ -63,8 +62,8 @@ for epoch in range(100):
         optimizer.zero_grad()
 
 with torch.no_grad():
-    X_eval = X.to(device = gpu)
-    Y_eval = Y.to(device = gpu)
+    X_eval = X.to(device = cpu)
+    Y_eval = Y.to(device = cpu)
     print(f"final output = {model(X_eval)}")
 
     final_loss = Loss_fn(model(X_eval), Y_eval)

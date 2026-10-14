@@ -23,7 +23,13 @@
 - 已实测解释器：`C:\Users\wwx\miniconda3\envs\dllab\python.exe`；Python `3.11.17`；PyTorch `2.10.0+cpu`；`torch.cuda.is_available()` 为 False。
 - 未修改依赖；Session 031 已在本机成功运行 C05，Session 036 已运行 C06 现有累积/清理与 detach 部分成功；未在本机重跑 C04。
 
-### 当前 Linux 设备（2026-10-13 Session 044 重新验证）
+### 当前 Windows 设备（2026-10-14 Session 052 验证）
+
+- 项目根目录：`C:\Github\projects\DeepLearningLab`。
+- 已实测解释器：`C:\Users\wwx\miniconda3\envs\dllab\python.exe`；Python `3.11.17`；PyTorch `2.10.0+cpu`；`torch.cuda.is_available()` 为 False。
+- 当前课程使用 CPU；Session 053 静态查看确认本地 `lessons/09_dataset_loader.py` 的模型、batch 和最终评估已使用 cpu 变量，cuda:0 仅为未使用的 gpu 变量；本轮未重跑训练。此前 Linux CUDA 验收结论保留。
+
+### Linux 设备历史（2026-10-13 Session 044 重新验证）
 
 - 项目根目录：`~/projects/DeepLearningLab/`。
 - 已有内容：`lessons/`、`nanoGPT/`、`README.md`。
@@ -38,12 +44,12 @@
 
 | 字段 | 当前内容 |
 |---|---|
-| 当前主要课程 | `C09` — Dataset、DataLoader、batch、shuffle 与默认 collate，联系 A02/A06/A10 |
-| 实际作业 | C09 已验收文件为根目录 `09_dataset_loader.py`；C08 当前文件为 `lessons/08_train_linear.py`，已有作业保留 |
-| 作业状态 | C09 `PASSED`（CPU Dataset、CUDA batch 训练与最终无梯度评估完整运行正确）；C10 未开始 |
-| 通过验收的课次 | `C01`、`C02`、`C03`、`C04`、`C05`、`C06`、`C07`、`C08`、`C09`（不等同于全部内容无需提示的独立熟练） |
+| 当前主要课程 | `C11` — CPU 调试、数值/梯度检查、内存估算与基准计时；CUDA 专属实践待相应设备 |
+| 实际作业 | C11 学生当前草稿为 `lessons/11_debug_check.py`（采用学生实际文件名）；C10 已通过文件为 `lessons/10_state_dict.py`；已有作业保留 |
+| 作业状态 | C11 `PASSED`（当前 CPU 范围），完整脚本计算/梯度/存储/计时正确；Timer 的名称查找与作用本轮继续补讲，CUDA 专属实践未完成 |
+| 通过验收的课次 | `C01`、`C02`、`C03`、`C04`、`C05`、`C06`、`C07`、`C08`、`C09`、`C10`、`C11`（C11 为 CPU 范围；不等同于全部内容无需提示的独立熟练） |
 | 当前里程碑 | P-C 之前；长期 P-E 是独立 mini-GPT |
-| 下一个最小动作 | 用户请求后开始 C10 初始化、随机种子与 state_dict；本轮统一 device、整体模型迁移和复用最终预测为可选整理建议，不需重做 C09 验收 |
+| 下一个最小动作 | 本轮补讲 globals 名称查找、stmt 函数调用与 Timer 测量含义；用户请求继续时按 P-C 核对已有成果，不自动推进 D 阶段 |
 
 ## 3. 已讲解但尚未通过的知识
 
@@ -63,6 +69,8 @@
 
 ### 尚未完整验收的内容
 
+- PyTorch：C11 已在 Session 062 通过当前 CPU 范围。函数、gradcheck 与 Timer 经多轮提示修正，学生本轮仍询问 globals/stmt 括号区别与计时用途，补讲不等于已独立解释，不追加验收关卡；detect_anomaly 未实践，CUDA 监测/显存/同步计时待设备补实践。B05 数值导数仅联系，不整模块标记通过。
+- PyTorch：C10 已通过；初始化种子与共享参数经历提示、解释和修正，非无提示全面熟练。当前纯线性模型未调用 eval，但不改变本模型输出，不作为通过阻塞；原模型重新装载自身权重为可选简化项。Python 字典和路径仅按需联系，不整模块验收。
 - Python：`import`、对象属性 `.` 的直观用法、索引/切片的最初介绍。
 - Conda / pip：环境创建与激活、依赖隔离的基本概念；此前讲解时的环境名示例与真实环境不同。
 - PyTorch：C08 已通过，梯度下降减号与负梯度导致参数增大的关系在 Session 045 补讲，尚无学生独立解释证据；Session 046 静态查看确认已补最终 no_grad 前向，未重跑该修改。B08 联系梯度下降，不整模块标记通过。C07 类/初始化、C06 梯度模式及 C05 梯度保存需复习；A03/A05/A06、B05 与 B03/B04 未整模块验收。
@@ -84,6 +92,10 @@
 ## 5. 掌握证据与待补修点
 
 ### 已验收
+
+- C11（CPU 范围）：`lessons/11_debug_check.py` 已完整运行成功，有限性 True、gradcheck True、X 元素存储 40 字节；此前导师验证 shape 断言有效。globals 正确映射函数对象及参数，blocked_autorange 返回 Measurement 并读取 median；Session 062 单次中位数约 38.07 微秒，报告测量波动较大，不记录为稳定性能结论。保留提示依赖与 CUDA 未实践限制。
+
+- C10：`lessons/10_state_dict.py` 在 Windows dllab / Torch 2.10.0+cpu 完整执行成功，无警告。W/b shape [1]，最终预测 [5,1]；W=2.0、b=0.9999999403953552，MSE=7.10542746348012e-16。独立 model_copy 由磁盘 state_dict 恢复，参数逐项相等、预测 allclose True，未训练模型对照 False。两次运行初始 W 输出约 0.0337 及全部检查结果一致。测试采用临时工作目录保存/读取文件，学生已有 checkpoint 未被覆盖；保留提示依赖。
 
 - C09：根目录 09_dataset_loader.py 已实测完整运行成功，Dataset 长度 5、索引 2 配对 [0]/[1]，loader 长度 3、batch Shape [2,1]/[2,1]/[1,1]；CPU 数据按批迁移 CUDA，100 个 epoch 后 W=2、b≈0.99999988。最终 no_grad 全数据评估 MSE≈5.68434e-15、最大绝对误差≈1.19209e-7。多轮提示依赖保留，非全面独立熟练证据。
 
@@ -605,6 +617,95 @@
 - **验收结论**：C09 PASSED，数据集、默认 collate、shuffle 配对、小批量梯度更新、设备安排及最终评估均正确，不追加打印/格式/手算关卡；保留之前取样协议、解包、迁移等多轮提示记录。
 - **优化指导**：澄清当前 to 调用已按整个 Tensor 迁移，并非逐标量；建议模型类中常规创建注册参数，实例创建后用 Module.to(device) 统一递归迁移参数/注册 buffer，再创建优化器。统一目标设备，batch 仍按 Tensor 迁移；普通 Tensor 属性与外部输入不自动随模型移动。可用 zeros 简化零初始化、循环变量嵌套解包、保存一次最终预测供打印与损失复用。模型整体 to 简化管理，不代表所有参数合为一次物理拷贝；较大数据可研究 loader pin_memory 与 Tensor.to non_blocking，实际加速需测量，本轮未做测速或改写。
 - **下一步 / 环境变更 / Git commit**：用户请求后进入 C10，简化建议为可选改进；自动更新进度，无学生代码/依赖修改或 Git 同步。
+
+### Session 052 — 2026-10-14（Windows 恢复，解释 batch 设备搬运的简化方法）
+
+- **恢复与只读检查**：按用户所述 Git pull 后读取本地 AGENTS.md、教学 skill、当前进度、最近实际 Session 051 及规划 C09；查看 `lessons/09_dataset_loader.py`。本地 git status 显示 main 跟踪 origin/main 且工作区检查时无更改；未检查远端或执行 pull，不宣称远端已同步。
+- **当前状态**：C01–C09 已通过，C10 未开始。本次为 C09 补充说明，不重新验收或提前推进 C10。当前代码已使用 Module.to 并在创建优化器前迁移模型，batch 输入与目标分别迁移。
+- **环境实测**：Windows dllab Python 输出 3.11.17、Torch 2.10.0+cpu、CUDA 可用性 False；未运行固定 cuda:0 的课程脚本，无本机训练结果。指导统一 device 配置并按实际 CUDA 可用性选择 CPU/CUDA，保留此前 Linux 通过证据。
+- **补充指导**：DataLoader 是迭代取批的对象，没有内置 to；当前 batch 是两个 Tensor 的容器，每个 to 已迁移整个 Tensor。可用生成器表达式逐 Tensor 转换后解包，或学生自写 move_batch(batch, device) 辅助函数复用；这简化调用，仍分别迁移输入/目标，不会合并成一次物理拷贝。只含 Tensor 的平坦批次可简单遍历，嵌套 dict/list 等需要按结构处理。Tensor.to 返回转换结果，迁移不改变 shape 或数值；Module.to 原地迁移注册参数/缓冲区，外部数据不会自动随之移动。pin_memory 仍是 CPU 内存，非自动 GPU 迁移；CUDA 性能优化与 non_blocking 留作可选后续内容。
+- **证据与下一步**：仅静态查看、环境检查及官方 PyTorch 2.10 API 核对；未代写学生代码或宣称学生已掌握新增语法。最小可选整理为统一设备配置，再由学生选择保留两行迁移或封装 batch 辅助函数；无需为该整理重做 C09 验收。未改变依赖或执行 Git 同步。
+
+### Session 053 — 2026-10-14（开始 C10：初始化、随机种子与保存/恢复推理）
+
+- **恢复与已有代码**：按用户明确请求进入下一章；重读 AGENTS.md、教学 skill、当前进度与最近 Session 052、规划 C10，并只读查看 C09。学生已将模型、batch、最终评估改为 CPU，保留未使用的 gpu 变量；当前未发现 C10 作业文件。工作区已有进度与 C09 修改，未覆盖学生代码。
+- **课程内容与用途**：让实验起点和随机顺序可重复，并将训练得到的参数持久化、加载到独立实例复现推理；复用线性回归数据与既有训练，不增加新算法。
+- **原理/API 讲解范围**：初始化是赋予训练起点，线性模型零初始化有效而多隐藏单元可能存在对称性问题；normal_ 的均值/标准差、原地填充与内部 no_grad；manual_seed 设置随机序列起点，需在随机初始化和 loader 迭代前设置，非每次随机调用结果都相同，跨版本/设备无完全复现保证。state_dict 为名称到参数/持久 buffer 的映射，不保存 forward、梯度、优化器或完整实验状态；浅拷贝不等于冻结快照。save 写盘、load 返回保存对象、load_state_dict 将数值装入已有同结构模型并返回匹配报告；strict 保持默认 True，加载使用 weights_only=True、map_location='cpu'。eval 与 no_grad 分别控制模块行为与图记录，简单线性模型 eval 不改变公式。allclose 用容差比较预测。
+- **学生任务**：自行创建 `lessons/10_state_dict.py`，复用 C09 的 CPU 数据和训练。训练前设置种子（例如 42），W 使用均值 0、标准差 0.1 的正态初始化，b 为零；观察初始参数及首轮 batch，重跑同一程序核对随机起点/顺序。继续原有 SGD lr=0.1、batch_size=2、100 epoch，训练后计算最终预测并查看 state_dict 的键及 Tensor Shape。将 state_dict 保存为 `linear_c10.pt`（相对运行工作目录），另建同结构模型，读取并装载该文件，在 eval/no_grad 下比较两模型同输入预测。文件加载与推理应能独立于训练执行，不要求本轮拆成多个源码文件。
+- **验收标准与状态**：C10 EXPLAINED，未实现/未运行。核心为受控随机初始化、训练正确、磁盘参数恢复到独立模型、预测数值一致；无完整代码代写、强制手算/预测注释或优化器恢复关卡。完整训练断点恢复留到后续 D08，非本轮任务。
+- **下一步 / 环境 / Git**：学生先完成种子和初始化，再接保存/恢复；依据 Session 052 的 Windows CPU 环境，不运行 CUDA 或修改依赖。本轮只维护学习记录，未创建学生脚本或模型文件，未执行 Git 同步。
+
+### Session 054 — 2026-10-14（C10 草稿审阅：种子调用的副作用与返回值）
+
+- **恢复与范围**：重读当前进度、最近 Session 053、规划 C10、AGENTS.md 与教学 skill；只读查看 `lessons/10_state_dict.py`，针对学生认为 seed 未使用的疑问给提示，未改写代码。
+- **静态证据**：第 4 行 seed = torch.manual_seed(42) 已在模型初始化与 loader 迭代之前执行；第 28 行 normal_ 使用 generator=None，走默认生成器，默认 loader shuffle 也受已设置的 PyTorch 随机状态影响。seed 变量后续未引用，但函数调用设置随机状态的副作用已发生；该变量实际保存 Generator，不是整数 42。提示可不接返回值，或将 seed 留作整数配置再传给 manual_seed，无需为当前目标建立独立 Generator。
+- **验证提示**：重复运行程序，比较训练前 W 与第一轮 batch 顺序；不只比较训练后参数，因为不同随机起点也可能收敛到同一解。不在每个 epoch 重置种子。
+- **其他核心观察**：当前标准差为 1.0，与原任务的 0.1 不同，但不是随机种子失效或数学错误。保存后两次加载均装回同一个 model，最终 allclose 比较的是该模型在 no_grad/inference_mode 下的预测，尚未展示独立实例恢复；提示另建同结构模型装载文件，比较原训练模型与恢复模型的预测。
+- **状态与证据限制**：C10 IN_PROGRESS；仅静态审阅与官方 PyTorch API 核对，未执行含 save 的脚本，无训练或磁盘恢复验证结果，不记录通过。下一项最小任务为随机起点观察及独立模型恢复修正；未修改作业、依赖或执行 Git 同步。
+
+### Session 055 — 2026-10-14（C10 调试：参数维度误用样本数，引发 MSE 广播警告）
+
+- **恢复与代码**：重读当前进度、最近 Session 054、规则、教学 skill 与规划 C10，查看 `lessons/10_state_dict.py`。学生已将 normal_ 标准差改为 0.1，添加初始权重观察、独立 model_copy 加载和未训练 model_no_trained 对照；但第 27/30 行将 W/b 都改成 shape [5]。
+- **局部真实复现**：使用已确认的 Windows dllab 解释器，通过 AST 仅提取学生 imports 与 Linear_model 类，未执行训练、save/load 或整脚本。Torch 2.10.0+cpu、CUDA False；实例 W/b 均 [5]，两样本输入 [2,1] 产生预测 [2,5]，与目标 [2,1] 的 MSE 复现同类 UserWarning；单样本预测 [1,5]、全五样本预测 [5,5]。本轮没有覆写 linear_c10.pt 或学生脚本。
+- **原因与提示**：逐元素乘法从尾维对齐，[B,1] 与 [5] 广播为 [B,5]，表示每个样本输出五个预测；样本数 5 不决定模型参数数量。当前单输入单输出线性关系需要共享单个 W/b，恢复与 [B,1] 输出兼容的参数 shape；不通过扩张标签或随意 reshape 预测隐藏问题。MSE 将 [B,1] 目标逻辑扩展到 [B,5]，能计算但偏离本节预期任务；2/2/1 分批对应两种警告尺寸。
+- **allclose 的含义**：当前比较原模型与 model_copy，是独立恢复比较的正确方向；True 只证明两模型预测一致，不能证明输出 shape/目标关系正确，两者可共享同一模型定义错误。学生提供 True 输出，本轮未执行其完整保存恢复流程或另行验证该布尔值。
+- **状态与下一步**：C10 IN_PROGRESS；学生修正参数 shape 后观察当前 batch 的预测/目标 shape，重新训练并保存修正后的状态，再比较恢复预测及最终目标拟合。未追加非核心关卡、代写核心代码、改变依赖或同步 Git。
+
+### Session 056 — 2026-10-14（补讲：逐元素配对与跨样本共享参数）
+
+- **恢复与疑问**：重读当前状态、最近 Session 055 与 C10 规划，并查看当前模型定义；W/b 仍为 [5]。学生设想五个权重分别乘五个样本，需区分合法的逐元素运算与本节模型的语义。
+- **补充解释**：[5] 与 [5] 相乘可实现 XiWi，但当前 X 为 [5,1]，与 [5] 从尾维对齐会得到 [5,5]，是 XiWj 的全部组合。扁平化能改变配对方式，但每个样本一个独立 Wi/bi 会改变为按样本位置指定参数的模型，不是所有样本共享 W/b 的线性回归。当前小批量长度 2/1 以及 shuffle 也不能直接对应固定五个参数。
+- **原理与用途**：本任务通过五个样本估计一条公共直线，以便预测未见输入（例如 x=3）；参数数量由模型关系/输入输出特征决定，不由样本数决定。五个权重可用于其他合理结构，本节需保持单输入单输出共享参数。
+- **状态与下一步**：C10 IN_PROGRESS；仅补讲与静态查看，无新运行、实现或独立理解确认，不升级熟练度。下一步仍为学生修正单输出参数 shape、复查预测与目标 [B,1] 后重新训练/保存；未修改作业或增加验收关卡。
+
+### Session 057 — 2026-10-14（C10 通过，准备进入 C11）
+
+- **恢复与修正**：重读当前状态、最近 Session 056、AGENTS.md、教学 skill、C10/C11 规划及学生文件。W/b 已恢复 shape [1]，正态初始化 std=0.1，独立 model_copy 加载及未训练模型对照保留。
+- **真实执行方法**：Windows dllab 解释器通过 runpy 完整执行学生脚本，在 TemporaryDirectory 内设定运行目录，实际保存/读取 linear_c10.pt；不覆盖仓库已有模型文件。为验证本章随机起点复现执行两次，未改写学生代码。
+- **验收结果**：Torch 2.10.0+cpu、CUDA False；脚本运行退出码 0、无警告；初始 W 打印约 0.0337，两次 stdout 与检查结果一致。最终 W=2.0、b=0.9999999403953552，预测 shape [5,1]、数值 [-3,-1,0.9999999403953552,3,5]，全数据 MSE=7.10542746348012e-16。保存文件确实创建；model_copy 与 model 为不同实例，状态参数逐项相等、预测比较 True，未训练对照 False。
+- **结论与限制**：C10 PASSED，体现受控随机初始化、共享参数训练与独立模型的磁盘恢复。未单独捕获首轮 shuffle 顺序，不虚构该证据；两次程序结果一致与正确种子设置足以确认本轮核心。未调用 eval 对本线性模型无影响，记录为后续含 Dropout/BatchNorm 时的习惯提醒；原模型重复装载自身参数可选简化，不阻塞。
+- **下一步 / 环境 / Git**：用户已授权无问题后进入下一节，开始 C11 CPU 调试、梯度检查与基准计时；GPU 部分按设备条件安排。自动更新进度，不变更依赖、代写作业或执行 Git 同步。
+
+### Session 058 — 2026-10-14（C11 开课：CPU 调试与计算检查工具）
+
+- **授权与定位**：C10 通过后，按用户本轮“没有问题进行下一步”的请求开始 C11。沿用刚读取的规则、进度与 C11 规划，当前 lessons 未有 C11 文件；CPU 环境已验证。
+- **内容与意义**：建立局部诊断流程，分清可运行、预测正确、梯度正确、计时可信各自的证据。traceback 从末尾错误类型/信息找到学生代码调用；assert 检查预测与目标 shape，异常或 warning 的意义不同。isfinite 返回布尔 Tensor，all 汇总检查 NaN/Inf；detect_anomaly 可在前向和反向共同范围记录失败 backward 对应的前向来源，仅调试时使用。
+- **数学/API**：有限差分 [f(w+eps)-f(w-eps)]/(2eps) 与 autograd 对照；gradcheck(func, inputs, eps=1e-6, atol=1e-5, rtol=1e-3) 接收函数对象及 Tensor 参数元组，CPU float64、requires_grad=True，函数每次从参数重新计算标量 loss，保留计算图，返回 True 或默认报错。局部检查通过不代表整个学习任务正确。Tensor 存储字节数估算为 numel()*element_size()，不含图/对象/整个程序内存。Timer(stmt, globals, num_threads=1) 使用待计时字符串与名称到对象的字典，blocked_autorange(min_run_time=0.2) 返回 Measurement，median 以秒计；测量仅前向 loss，不含打印、训练或读写文件。
+- **综合手写任务**：学生创建 `lessons/11_debug_checks.py`；沿用 X/Y 五个样本，但 CPU float64，w/b 为 shape [1] 的独立叶子 Tensor，初值 0.3/-0.2，requires_grad=True。写 loss_for_check(w,b) 返回 mean((X*w+b-Y)^2)，在 loss 前断言预测目标 shape 相同；完成一次 backward，输出 loss 与两项梯度，检查有限性；由学生选用一次错误 shape 输入验证断言能定位，再恢复正确输入，不强制文字注释或手算。gradcheck 传函数对象和 (w,b)，记录结果；估算 X 元素存储字节数；Timer 对正确 loss 函数前向短测，打印测量结果，不要求速度达到阈值。不重写模型/训练循环或安装依赖。
+- **状态与限制**：C11 EXPLAINED，无学生实现/运行结果。核心为 shape 检查有效、数值梯度对照正确、内存/时间输出含义正确；GPU 专属监测与缓存/同步留到可用设备补实践。导师只验证本机相关 API 签名及 benchmark 导入可用，没有替学生完成作业。
+- **计划与下一步**：LEARNING_PLAN.md 增补 C11 的 CPU 组织与 CUDA 待实践说明；学生先写 loss 函数及检查，再接 gradcheck 与计时。保留 C10 通过和全部历史，不修改学生作业、依赖或同步 Git。
+
+### Session 059 — 2026-10-14（C11 首版审阅：函数返回值、梯度开关与 gradcheck 调用方式）
+
+- **恢复与范围**：重读 AGENTS.md、教学 skill、当前进度、最近 Session 058、C11 规划与实际学生文件 `lessons/11_debug_check.py`。保留单数文件名，不要求改名，未代写学生代码。
+- **真实运行**：Windows dllab 解释器使用 -B 执行该文件，退出码 1；第 13 行 Loss_fn = nn.MESLoss() 报 NameError: name 'nn' is not defined。只执行到损失对象初始化，函数体未执行，不虚构 backward/gradcheck 的错误或输出。
+- **静态正确部分**：CPU float64 的 X/Y 与 shape [1] 的 w/b 初值正确，前向公式和预测/目标 shape 断言方向正确；目前 w/b 没有 requires_grad=True。
+- **静态待修**：import 别名为 aa 而使用 nn，损失类拼成 MESLoss；loss_for_check 无 return、包含 backward/打印/gradcheck，且整文件尚未调用该函数。第 24 行 torch.utils.gradcheck 命名空间不正确，传入的是已计算 loss 和分开的 w/b，应该理解为 torch.autograd.gradcheck 接收函数对象及 Tensor 参数元组。
+- **分步提示**：先统一别名和 MSELoss 名称，为 w/b 开启梯度；将 loss_for_check 限定为前向、断言、计算并返回标量 loss Tensor。函数外调用得到 loss 后执行一次 backward，再观察 loss 与 w/b.grad 有限性；函数外另调用 gradcheck，传函数本身及 (w,b)，由工具反复重新计算。解释定义不等于调用、print 不等于 return，以及 Tensor 输出与函数对象的区别。
+- **状态与下一步**：C11 IN_PROGRESS；最小任务为前向/返回/一次反向及有限性检查，再修 gradcheck；内存估算与 Timer 尚未实现，待当前核心打通后继续，不在此轮叠加新要求。仅更新进度，未修改作业、依赖或执行 Git 同步。
+
+### Session 060 — 2026-10-14（C11 计算检查正确，补讲内存估算与 Timer 设计）
+
+- **恢复与修改**：重读当前位置、最近 Session 059、C11 规划与 `lessons/11_debug_check.py`。学生已修正 nn/MSELoss、开启 w/b 梯度、函数只返回 loss、函数外调用 backward 与有限性检查，gradcheck 使用函数对象及参数元组；新增 X.numel()*X.element_size()。
+- **真实运行**：Windows dllab 解释器以 -B 通过 runpy 执行当前脚本，退出码 0；loss=7.219999999999999，w.grad=[-6.8]，b.grad=[-2.3999999999999995]，loss 与梯度均有限，gradcheck=True。loss 为标量、参数 float64。X 的 numel=5、element_size=8，乘积 40 字节。
+- **断言验证**：导师另行将长度 2 的错误 w 传入学生 loss_for_check，预测 [5,2] 与目标 [5,1] 不同，AssertionError 正确触发；这是导师验证，不虚构学生已自行展示错误变体。
+- **反馈与设计提示**：当前实现没有需修复的计算错误；all elements=40 的打印标签实际代表字节数，为可选文字改进。解释 numel 元素数与 element_size 单元素字节、估算范围不含整个程序内存。Timer 需显式导入 benchmark 模块，stmt 是延迟执行函数调用的字符串，globals 将字符串名称 loss_for_check/w/b 映射到函数/Tensor 实际对象，不能将 loss 数值当成待计时计算；创建 Timer 不等于测量，blocked_autorange(min_run_time=0.2) 返回 Measurement，median 单位秒。当前测量前向含 Autograd 建图、不含 backward/打印/gradcheck，无需重复手写计时循环。
+- **状态与下一步**：C11 IN_PROGRESS，已实现核心检查正确，Timer 尚未编写/执行；下一项最小任务仅补齐 Timer 并打印测量结果，不重做已通过部分或追加预测/手算关卡。自动更新进度，不修改学生作业、依赖或执行 Git 同步。
+
+### Session 061 — 2026-10-14（C11 Timer 草稿：名称映射与 Measurement 返回值）
+
+- **恢复与静态检查**：重读当前进度、最近 Session 060、规划 C11 及学生 `lessons/11_debug_check.py`。已导入 benchmark、增加断言说明、将存储打印注明 bytes；stmt 的函数调用字符串、w/b 映射、线程数及短测参数方向正确。
+- **真实运行**：Windows dllab 解释器以 -B 执行该文件，退出码 1。有限性输出均 True、gradcheck=True、存储大小 40；第 34 行字典值 loss_for_check() 提前调用且未传 w/b，报 TypeError: loss_for_check() missing 2 required positional arguments: 'w' and 'b'。尚未创建 Timer 或执行测量，不虚构计时结果。
+- **修改提示**：globals 键 loss_for_check() 含调用括号，不能对应 stmt 中查找的函数名称；键使用名称字符串，值使用函数对象而非调用结果，w/b 现有映射保留。blocked_autorange 返回 Measurement，目前丢弃返回值；Timer 是执行工具、Measurement 是测量结果，median 属于后者，应接收结果并打印其报告与 median（单位秒）。不通过补调用实参把 Tensor 放进 globals 掩盖函数对象问题。
+- **状态与下一步**：C11 IN_PROGRESS；仅剩当前 Timer 映射/结果使用修正与实测，计算/梯度/存储部分无需重做。未代写作业、修改依赖或执行 Git 同步。
+
+### Session 062 — 2026-10-14（C11 CPU 实现通过，补讲名称查找与 Timer 的用途）
+
+- **恢复与代码**：重读当前进度、最近 Session 061、C11 规划及学生文件。globals 的键已改为 loss_for_check，值为函数对象，保留 w/b 对象；已接收 Measurement 并读取其 median。
+- **真实运行**：Windows dllab 解释器 -B 执行 `lessons/11_debug_check.py`，退出码 0；有限性均 True、gradcheck=True、X 字节数 40。计时报告为 49 measurements、每组 100 runs、1 thread，Median=38.07 us、median=3.8073998875916e-05 秒；IQR=10.47 us，报告较大环境影响。只记录此轮测量，不宣称稳定速度或做额外性能门槛。
+- **补讲重点**：字典字符串键允许含括号，并非 Python 禁止；当前 stmt 解析的是名称 loss_for_check，需在 globals 中查到同名函数，然后解析括号执行调用并传 w/b。区分名称字符串、函数对象和调用结果。Timer 是测量给定操作执行时间的工具；构造时提供任务与可用对象，blocked_autorange 才执行预热、分组重复测量并返回统计结果，组耗时除以组内次数归一化到每次调用。当前范围为预测/shape 检查/MSE 与 Autograd 建图，不含 backward/gradcheck/打印，也不更新参数；min_run_time=0.2 是测量阶段累计时间下限，不是每次函数耗时。
+- **结论与理解限制**：C11 PASSED（当前 CPU 核心范围），不因补充理解问题追加关卡；学生尚未自行解释 Timer/名称映射，保留多轮提示依赖，不称全面熟练。CUDA 与 anomaly 实践限制保留。
+- **下一步 / 环境 / Git**：本轮专注回答用户概念问题，不自动推进下一章；用户请求继续时核对 P-C 现有成果。自动维护进度，未修改作业或依赖，未同步 Git。
 
 ## 7. 后续 Session 模板（复制本段追加，不要覆盖历史）
 
