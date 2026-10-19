@@ -260,6 +260,19 @@ DeepLearningLab/
 | 5. 最佳快照 | 验证损失改善时，独立保存当前状态；best_val_loss可从正无穷开始，epoch0先参与选择 | state_dict返回含共享底层存储张量的字典；copy.deepcopy复制独立快照；改善时同步更新最佳损失/轮次/快照 | 不能仅赋值state_dict或model引用来冻结最佳状态；此处无须落盘/恢复优化器 |
 | 6. 最终选择与测试 | 两组完成后按best_val_loss选组（相等选A），恢复该组快照，再只评估此模型的test | load_state_dict(best_state)修改现有模型，返回键匹配信息，不返回模型；最终复用评估逻辑 | 选择依据仅val；测试不进入训练/轮次/结构选择；打印两组比较及最终test指标，按实际趋势解释 |
 
+**D05 本轮组织（2026-10-18）**：承接 D04 首轮模式设置与过拟合现象，用小张量行为实验加一次模型更新讲解 BatchNorm、LayerNorm 和 Dropout，不要求重复分类训练曲线。先定义隐藏特征归一化与随机正则化的用途，再推导归一化的均值/方差统计轴、eps、可学习gamma/beta，区别参数与running buffers。对本轮[B,C]，BN训练按列统计，LN(C)逐行沿末轴统计；LN推广到[B,T,C]时仍每个token沿C计算。说明BN默认track_running_stats=True，训练使用当前batch并更新running_mean/var/num_batches_tracked，eval使用running统计且不更新；即使no_grad，train前向仍更新buffers。BN前向和LN方差使用correction=0，BN running_var更新用correction=1；BN momentum=0.1为统计EMA权重，不是优化器动量。LN两模式均使用当前样本统计，无running均值方差。Dropout(p=0.5)训练时随机置零并将保留值乘2，eval恒等，不删除参数或断开整个计算图；no_grad不关闭随机掩码。讲清model.train/eval与梯度模式两个独立开关。
+
+**D05 学生实现框架：`lessons/16_norm_dropout.py`**。脚本开头seed42，所有浮点数据与模块统一float32/CUDA，按以下顺序手写，功能块可按段落组织，不强制函数化。
+
+| 顺序与目的 | 输入/输出与操作 | API 参数、返回值与副作用 | 核心自查 |
+|---|---|---|---|
+| 1. 对比统计轴与状态 | 固定X=[[1,2,4],[2,5,6],[4,3,8],[7,8,2]]，Shape[4,3]；新建默认BN(3)/LN(3)。train+no_grad各前向；打印BN输出按dim0、LN输出按dim1的均值/方差，并记录BN前后状态 | nn.BatchNorm1d(num_features,eps=1e-5,momentum=0.1,affine=True,track_running_stats=True)与nn.LayerNorm(normalized_shape,eps=1e-5,elementwise_affine=True)保持Shape；var(dim,correction=0)对应前向方差；running_mean/running_var/num_batches_tracked先clone后比较 | 初始gamma1/beta0，均值近0、方差近1而非严格相等；train+no_grad仍使BN计数/统计更新。列均值/方差为[3]，行均值/方差为[4] |
+| 2. 验证eval及LN模式 | 切BN eval，同一X前向两次，记录输出和buffers；LN同一X比较train/eval输出；列出BN的named_parameters与named_buffers名称 | .train()/.eval()递归改变模式而非requires_grad；.named_parameters()和.named_buffers()迭代(name,tensor)；.clone()保存独立状态；allclose作浮点近似比较 | BN eval重复输出一致且buffers不变；不要求BN train/eval输出相同，也不要求BN eval输出零均值单位方差；LN同输入两模式结果一致 |
+| 3. 验证随机正则化 | 单独创建全1输入U=[32,16]，Dropout(p=.5)在train+no_grad下连续两次前向，观察取值及零比例，再eval前向 | nn.Dropout(p=0.5,inplace=False)逐元素随机掩码，保持Shape；torch.ones创建输入；零比较转float取mean得零比例；no_grad不改变模块模式 | train输出0或2，零比例随机、通常约一半，不强制精确值或固定mask；两次前向间不重设seed；eval输出等于U |
+| 4. 接入可训练模型 | 另建3→8 Linear→BN(8)→ReLU→Dropout(.5)→Linear→3，使用同一X与y=[0,1,2,1] long。train下CE+SGD(lr=.01)做一次更新；随后eval普通前向与eval+no_grad前向对比 | 子模块作为模型属性注册、整体to后创建优化器；CE接原始[4,3] logits和[4]标签；backward/step只在训练部分。isfinite检查梯度；clone可保留更新前参数；requires_grad观察普通输出 | 梯度存在且有限、至少参数有变化，不要求每项梯度非零或一次loss必降。eval普通前向仍可requires_grad=True，eval+no_grad输出False；同参数/input下eval输出一致，BN buffers不再改变 |
+
+框架主线为固定输入→归一化轴/状态→Dropout随机行为→一次训练与评估，参考API说明参数/返回值/副作用与放置位置，不提供完整可运行模型或实验答案。验收核心为统计轴、BN buffers、Dropout模式和梯度模式关系及一次正确接入；无手算预测注释、下载、DataLoader、checkpoint、固定精度门槛或额外完整训练要求。可用atol约1e-5、rtol约1e-4作本例归一化统计的近似检查，eps使方差不严格等于1；本例仅检查初始gamma/beta未训练时的统计性质，不推广到任意学习后输出。
+
 **验收项目 P-D**：完整图像分类工程（小数据集，禁止以 SOTA 为目标）。必须至少包含 `model.py`、`train.py`、`evaluate.py`、配置、训练日志、checkpoint、README、至少 3 个有意义的测试。学生自己实现核心类/训练循环。
 
 ## 8. 阶段 E：Transformer、语言建模与 mini-GPT（E01–E14）

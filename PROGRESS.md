@@ -51,12 +51,12 @@
 
 | 字段 | 当前内容 |
 |---|---|
-| 当前主要课程 | D04 — 数据划分、泛化、过拟合与数据泄露 |
-| 实际作业 | D04 已验收文件为 `lessons/15_generalization.py`（学生已调整位置，导师未移动）；此前作业保留 |
-| 作业状态 | D04 `PASSED`（固定分层划分、两组训练评估、独立最佳快照、验证选择与最终单次测试均验证）；D05 未开始；D03/P-C 保持 `PASSED` |
+| 当前主要课程 | D05 — BatchNorm、LayerNorm、Dropout 与训练/评估模式 |
+| 实际作业 | 待学生新建 `lessons/16_norm_dropout.py`；已通过 D04 `lessons/15_generalization.py` 及此前作业保留 |
+| 作业状态 | D05 `EXPLAINED`（已安排原理/API/实现框架，尚无学生实现或运行证据）；D04/P-C 保持 `PASSED` |
 | 通过验收的课次 | `C01`、`C02`、`C03`、`C04`、`C05`、`C06`、`C07`、`C08`、`C09`、`C10`、`C11`、`D01`、`D02`、`D03`、`D04`（含 C11 CUDA 核心补充；不等同于全部内容无需提示的独立熟练或所有工具均已实践） |
 | 当前里程碑 | P-C 已通过；D 阶段 D04 已通过；长期 P-E 是独立 mini-GPT |
-| 下一个最小动作 | 用户请求后开展 D05 BatchNorm/LayerNorm/Dropout；D04 可在各组初始评估后显式恢复 train 模式，属非阻塞习惯改进，无必须补交任务 |
+| 下一个最小动作 | 学生先用固定[4,3]输入完成BN/LN统计轴与BN状态观察，再做Dropout模式实验，最后接入小模型完成一次更新及eval/no_grad对照 |
 
 ## 3. 已讲解但尚未通过的知识
 
@@ -76,6 +76,8 @@
 - 2026-10-17 学生补充：任务布置应提供明确实现框架，按依赖顺序逐块列出目的、输入输出（Shape/dtype/device）、操作步骤、API 参数/返回值/副作用和使用位置、核心自查点；配合主流程伪代码及必要接口/记录字段，指出当前第一步。函数化为可选组织方式，不代写完整答案，不降低难度或追加验收门槛。已同步到 AGENTS.md 与 LEARNING_PLAN.md。
 
 ### 尚未完整验收的内容
+
+- D05 在 Session 081 开课：解释BN/LN统计轴与affine参数、BN running buffers/EMA与两种方差估计、Dropout随机掩码/缩放、train/eval与no_grad两个独立开关。已给出小张量实验与一次模型更新的实现框架，尚无学生实现/结果/独立解释证据，不标记掌握；不把上一章对模式概念的确认替代本章模块行为验收。
 
 - D04 在 Session 080 通过：学生在 Session 078/079 原理/API/实现框架提示后完成 lessons/15_generalization.py，数据隔离、训练与验证评估、独立最佳快照和最终一次测试正确。当前两组初始 evaluate 后首轮更新仍处 eval，纯 Linear/ReLU 不影响本轮结果；显式恢复 train 留为非阻塞习惯改进。过拟合趋势已由导师依据真实指标解释，尚无学生独立口头分析证据，不等同于无提示熟练或普遍模型选择结论。
 
@@ -915,6 +917,17 @@
 - **选择与单次测试**：选中模型1的epoch100状态；profile确认test调用恰一次，在两模型各完成400次更新之后，进入测试前参数等于该组最佳快照。学生最终test CE=0.1408264935016632、accuracy=0.9487179517745972。两组最佳评估点之后val CE持续上升，结合较低训练误差体现过拟合迹象；这是当前划分/种子实验的证据，不推广大模型必然更差。导师解释不作为学生独立分析证据。
 - **结论与非阻塞建议**：D04 PASSED，无必须补交任务。各组初始evaluate会置eval，而首轮更新前未显式train，直到首轮末才恢复；当前纯Linear/ReLU行为不受影响，不阻塞通过，建议在开始各组训练前明确train以形成习惯。评估每轮重算、每20轮记录，虽有冗余但正确；evaluate返回Tensor、调用方item已满足记录目标；外层重复no_grad、命名/格式等不追加修改要求。
 - **下一步 / Git**：用户请求后开展D05；自动更新实际状态、证据与待复习项，保留历史，未修改学生代码、依赖或执行Git同步。
+
+### Session 081 — 2026-10-18（D05 开课：归一化、随机正则化与模式行为）
+
+- **恢复与授权**：学生请求下一课；重读AGENTS.md、教学skill、当前位置与实际Session080、D05规划，只读查看已有lessons/15_generalization.py模型/评估段与文件清单。D04保持PASSED，尚无D05文件；本地git status在编辑前干净，未查远端，不宣称已同步。
+- **环境与来源**：dllab Python实测3.11.17、Torch2.10.0+cu128、Torch CUDA12.8可用，GPU RTX PRO6000 Blackwell；读取本地BatchNorm1d/LayerNorm/Dropout接口签名。查阅官方PyTorch2.10 BN/LN/Dropout/no_grad/var/allclose文档及BN/LN原论文；既存缺NumPy导入警告不影响接口检查，未安装依赖、运行旧训练或预写学生实验。
+- **内容与意义**：隐藏特征归一化服务优化，Dropout通过随机屏蔽激活提供正则化；联系后续CNN与Transformer，以及D04在验证前应切eval以避免BN从验证数据更新状态。对[B,C]用列/行对照及小数值例子说明BN跨batch按特征统计、LN逐样本沿末轴统计；[B,T,C]的LN(C)逐token沿C计算。解释(x-mean)/sqrt(var+eps)*gamma+beta、初始gamma1/beta0，归一化不限制以后学习后的输出恒为零均值单位方差。
+- **API与状态**：BN默认track_running_stats=True，训练使用batch并更新running_mean/var/num_batches_tracked，eval使用running统计且不更新，no_grad不阻止train时状态更新。momentum0.1为统计EMA而非优化器动量；前向方差为correction0，running_var的batch估计为correction1。LN按normalized_shape指定末尾维度，两模式同一规则，无running均值方差。Dropout(.5)训练逐元素随机置零/保留值乘2，eval恒等，no_grad不关闭掩码。mode不等于梯度开关，BN/LN参数仍参与Autograd。
+- **实现框架/任务1–2**：新建lessons/16_norm_dropout.py，seed42，float32/CUDA。X=[[1,2,4],[2,5,6],[4,3,8],[7,8,2]]为[4,3]，先用新BN(3)/LN(3)在train+no_grad前向，分别观察列/行均值和correction0方差；先clone独立保存BN running状态再比较更新。随后BN eval重复前向核对输出一致与buffers不变，LN同输入train/eval输出一致，枚举BN参数/buffer名称。提供接口、Shape、用途与副作用，不要求手算或精确等于0/1。
+- **实现框架/任务3–4**：Dropout单独对全1[32,16]输入在train+no_grad连续两次前向，打印取值及零比例，eval确认恒等；不重设每次前向的seed，不强求恰50%或固定随机值。另建3→8 Linear→BN8→ReLU→Dropout(.5)→Linear3模型，用同X、y=[0,1,2,1] long和SGD lr.01进行一次CE反向/更新，检查有限梯度及参数变化；再对照eval普通前向与eval+no_grad的输出requires_grad（True/False），相同参数下输出一致、BN状态不再更新。
+- **验收范围/组织**：遵循学生新规则，按目的→输入输出/Shape/dtype/device→步骤→API参数/返回值/副作用→自查点给四块框架和主流程伪代码；可按段落或函数组织。核心为统计轴、BN状态、Dropout模式、梯度记录与一次正确接入；不要求下载/loader/保存/重复长训练、精度门槛、所有梯度非零、每项参数必变或单步loss必降。归一化统计只针对本例初始affine，eps/浮点误差用容差处理。
+- **状态与下一步 / Git**：D05 EXPLAINED，学生先实现归一化对照，完成整章后集中审阅；未据讲解标记熟练。仅更新LEARNING_PLAN.md与PROGRESS.md，未代写代码、改变依赖或执行Git同步。
 
 ## 7. 后续 Session 模板（复制本段追加，不要覆盖历史）
 
