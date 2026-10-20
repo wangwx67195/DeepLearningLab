@@ -52,11 +52,11 @@
 | 字段 | 当前内容 |
 |---|---|
 | 当前主要课程 | D05 — BatchNorm、LayerNorm、Dropout 与训练/评估模式 |
-| 实际作业 | 待学生新建 `lessons/16_norm_dropout.py`；已通过 D04 `lessons/15_generalization.py` 及此前作业保留 |
-| 作业状态 | D05 `EXPLAINED`（已安排原理/API/实现框架，尚无学生实现或运行证据）；D04/P-C 保持 `PASSED` |
-| 通过验收的课次 | `C01`、`C02`、`C03`、`C04`、`C05`、`C06`、`C07`、`C08`、`C09`、`C10`、`C11`、`D01`、`D02`、`D03`、`D04`（含 C11 CUDA 核心补充；不等同于全部内容无需提示的独立熟练或所有工具均已实践） |
-| 当前里程碑 | P-C 已通过；D 阶段 D04 已通过；长期 P-E 是独立 mini-GPT |
-| 下一个最小动作 | 学生先用固定[4,3]输入完成BN/LN统计轴与BN状态观察，再做Dropout模式实验，最后接入小模型完成一次更新及eval/no_grad对照 |
+| 实际作业 | D05 已验收文件为 `lessons/16_norm_dropout.py`；此前作业保留 |
+| 作业状态 | D05 `PASSED`（归一化轴、BN状态、Dropout行为、单步训练及梯度模式均验证）；D06 未开始；D04/P-C 保持 `PASSED` |
+| 通过验收的课次 | `C01`、`C02`、`C03`、`C04`、`C05`、`C06`、`C07`、`C08`、`C09`、`C10`、`C11`、`D01`、`D02`、`D03`、`D04`、`D05`（含 C11 CUDA 核心补充；不等同于全部内容无需提示的独立熟练或所有工具均已实践） |
+| 当前里程碑 | P-C 已通过；D 阶段 D05 已通过；长期 P-E 是独立 mini-GPT |
+| 下一个最小动作 | 用户请求后开展 D06 卷积、padding、stride、pooling与输出形状；D05 无必须补交任务，反向前grad=None及BN前线性bias近零梯度作为理解提示 |
 
 ## 3. 已讲解但尚未通过的知识
 
@@ -77,7 +77,7 @@
 
 ### 尚未完整验收的内容
 
-- D05 在 Session 081 开课：解释BN/LN统计轴与affine参数、BN running buffers/EMA与两种方差估计、Dropout随机掩码/缩放、train/eval与no_grad两个独立开关。已给出小张量实验与一次模型更新的实现框架，尚无学生实现/结果/独立解释证据，不标记掌握；不把上一章对模式概念的确认替代本章模块行为验收。
+- D05 在 Session 082 通过：学生在Session081原理/API/框架讲解后完成统计轴、BN状态、Dropout和单步训练/梯度模式实验。额外momentum=1对照亦正确，train/eval差异由导师依据两种方差估计解释；BN前Linear bias不变的消均值原因和反向前grad=None由导师提示，尚无学生独立解释证据。不据通过推断归一化理论、所有布局或无提示迁移均熟练。
 
 - D04 在 Session 080 通过：学生在 Session 078/079 原理/API/实现框架提示后完成 lessons/15_generalization.py，数据隔离、训练与验证评估、独立最佳快照和最终一次测试正确。当前两组初始 evaluate 后首轮更新仍处 eval，纯 Linear/ReLU 不影响本轮结果；显式恢复 train 留为非阻塞习惯改进。过拟合趋势已由导师依据真实指标解释，尚无学生独立口头分析证据，不等同于无提示熟练或普遍模型选择结论。
 
@@ -110,6 +110,8 @@
 ## 5. 掌握证据与待补修点
 
 ### 已验收
+
+- D05：Session082 CUDA完整运行一次通过。BN输出列均值[0,0,0]、方差约0.999998，LN输出行均值绝对值小于8e-8、方差约0.999994–0.999999；BN在train+no_grad下计数0→1、running_mean更新为约[.35,.45,.5]、running_var约[1.6,1.6,1.566667]，eval不变。LN两模式一致；Dropout全1输入在train+no_grad输出0/2，两次零比例0.49609375/0.5390625、掩码不同，eval恒等。75参数模型SGD lr.01完成一次更新，六参数梯度均存在、Shape正确且有限，五个参数张量发生变化；train/eval/eval+no_grad输出requires_grad=True/True/False，eval输出一致且BN状态不变。训练CE=1.0971863269805908；不要求精度或单步损失降低。
 
 - D04：Session 080 在 dllab CUDA 完整执行一次，使用临时工作目录承接学生检查点 I/O，未写仓库 model_1.pt/model_2.pt。三类各64点；train/val/test 数量36/78/78，类别计数各[12,12,12]/[26,26,26]/[26,26,26]，索引互斥并覆盖0–191，实际X/y与原始索引配对。两组各400次更新、四参数梯度均存在且有限，首步均改变；四条历史各21个有限Python数值，最佳val CE与快照恢复结果一致。模型1最佳epoch100/val CE0.1789046823978424，模型2最佳epoch20/val CE0.19578111171722412；选择模型1最佳状态后仅一次test，CE0.1408264935016632、accuracy0.9487179517745972。两组epoch400 val CE分别0.31458139419555664/0.37048840522766113，显示继续拟合训练数据后的验证恶化迹象，不推广网络大小的普遍优劣。
 
@@ -928,6 +930,18 @@
 - **实现框架/任务3–4**：Dropout单独对全1[32,16]输入在train+no_grad连续两次前向，打印取值及零比例，eval确认恒等；不重设每次前向的seed，不强求恰50%或固定随机值。另建3→8 Linear→BN8→ReLU→Dropout(.5)→Linear3模型，用同X、y=[0,1,2,1] long和SGD lr.01进行一次CE反向/更新，检查有限梯度及参数变化；再对照eval普通前向与eval+no_grad的输出requires_grad（True/False），相同参数下输出一致、BN状态不再更新。
 - **验收范围/组织**：遵循学生新规则，按目的→输入输出/Shape/dtype/device→步骤→API参数/返回值/副作用→自查点给四块框架和主流程伪代码；可按段落或函数组织。核心为统计轴、BN状态、Dropout模式、梯度记录与一次正确接入；不要求下载/loader/保存/重复长训练、精度门槛、所有梯度非零、每项参数必变或单步loss必降。归一化统计只针对本例初始affine，eps/浮点误差用容差处理。
 - **状态与下一步 / Git**：D05 EXPLAINED，学生先实现归一化对照，完成整章后集中审阅；未据讲解标记熟练。仅更新LEARNING_PLAN.md与PROGRESS.md，未代写代码、改变依赖或执行Git同步。
+
+### Session 082 — 2026-10-20（D05 归一化与Dropout综合验收通过）
+
+- **恢复与文件**：重读学生最新AGENTS.md、教学skill、当前进度与实际Session081、D05规划和实现框架，查看lessons/16_norm_dropout.py。已有学生源码修改予以保留，不代写、改动或重构其代码；编辑前工作区仅该学生文件为M，不据本地状态推断远端同步。
+- **静态正确部分**：固定X为[4,3] float32 CUDA；均值/方差函数显式correction0，BN/LN按列/行观察。BN三个运行状态均先clone，train+no_grad前向后取快照，再eval比较；额外bn_test使用momentum1。Dropout(.5)对全1[32,16]输入两次train+no_grad前向，不重设种子，eval验证恒等。另建Linear3→8/BN8/ReLU/Dropout/Linear8→3的注册Module，统一CUDA后创建SGD lr.01，CE接[4,3] logits和[4] long目标，完成一次backward/step，随后比较eval普通前向与eval+no_grad并验证BN状态。
+- **真实运行与环境**：dllab Python通过runpy完整执行学生脚本一次，退出码0；验证进程临时包装SGD.step观察更新前梯度及前后参数副本，委托原step并在finally恢复。捕获stdout提取关键输出，随后只读检查返回对象；对独立BN仅另做一次eval+no_grad以核对重复前向和状态不变，未增加训练。Python3.11.17、Torch2.10.0+cu128、Torch CUDA12.8可用，GPU RTX PRO6000 Blackwell；未安装依赖或运行其他作业。
+- **归一化证据**：BN列均值[0,0,0]、correction0方差[0.9999980927,0.9999979734,0.9999977946]；LN行均值约[6.95e-8,-7.95e-8,-1.99e-8,5.96e-8]，方差约[.9999936223,.9999963641,.9999978542,.9999985099]，均符合eps/浮点容差。BN参数名weight/bias、buffer名running_mean/running_var/num_batches_tracked由导师检查确认；学生仅枚举buffers和打印weight.shape不阻塞。LN train/eval一致。
+- **BN状态证据**：train+no_grad使默认BN的num_batches_tracked由0变1，running_mean=[.3499999940,.4500000179,.5]，running_var=[1.6000000238,1.5999999046,1.5666667223]；分别匹配EMA均值和correction1方差更新。eval后计数仍1，均值/方差完全不变，重复eval输出一致。额外momentum1的running_var等于X的correction1方差，train/eval输出不相等符合定义；导师核对eval输出等于train输出乘sqrt((v_biased+eps)/(v_unbiased+eps))，本例每列约.8660256267，不误判为错误。
+- **Dropout证据**：两次train+no_grad输出唯一值均为[0,2]，零比例0.49609375/0.5390625，输出不相同且均不记录梯度；eval输出等于全1输入。随机比例不作为精确门槛。
+- **集成训练证据**：模型共75个可学习元素、六个参数张量，单次更新前grad均存在、Shape对应且有限，梯度范数约[1.1486826,2.3081961e-8,.1514978,.1746121,.9119134,.1272771]。第一层bias以外五个参数张量发生变化；first Linear bias不变符合BN批均值抵消共享偏置、浮点更新幅度极小的结果，不要求所有参数变化。训练CE=1.0971863269805908。三类前向输出均[4,3]，train/eval/eval+no_grad的requires_grad依次True/True/False，两个eval输出相同，模型BN状态在两个eval期间不变、计数仍1。
+- **验收结论与提示**：D05 PASSED，统计轴、buffers、随机正则化和梯度记录及训练接入核心均正确，无必须补交任务。第210–213行在backward前打印grad=None为正常现象，建议把真正的梯度有效性检查放在backward之后；学生之后已打印有限梯度，导师亦直接检查，不追加关卡。momentum1两种方差估计与第一层bias不变由导师说明，不当作学生已独立解释；命名/日志/注释清理为可选，不要求重做。
+- **来源 / 下一步 / Git**：复核官方PyTorch2.10 BatchNorm1d文档的correction0/1约定；后续用户请求再开展D06。仅更新实际进度与证据，未修改学生文件、依赖或执行Git同步。
 
 ## 7. 后续 Session 模板（复制本段追加，不要覆盖历史）
 
