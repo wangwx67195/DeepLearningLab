@@ -273,6 +273,20 @@ DeepLearningLab/
 
 框架主线为固定输入→归一化轴/状态→Dropout随机行为→一次训练与评估，参考API说明参数/返回值/副作用与放置位置，不提供完整可运行模型或实验答案。验收核心为统计轴、BN buffers、Dropout模式和梯度模式关系及一次正确接入；无手算预测注释、下载、DataLoader、checkpoint、固定精度门槛或额外完整训练要求。可用atol约1e-5、rtol约1e-4作本例归一化统计的近似检查，eps使方差不严格等于1；本例仅检查初始gamma/beta未训练时的统计性质，不推广到任意学习后输出。
 
+**D06 本轮组织（2026-10-21）**：以局部连接与空间权重共享说明卷积的图像建模用途，先讲单通道滑窗逐元素乘/求和/偏置，再扩展到NCHW、多输入通道求和与多个输出特征图。PyTorch Conv2d执行不翻转核的互相关，手写版本与其约定一致。明确stride是窗口起点步长、padding是边缘补零，dilation=1时输出高宽为floor((输入尺寸+2p-核尺寸)/s)+1；池化沿空间逐通道取最大/均值，不引入可学习参数，默认ceil_mode=False。区分nn.Conv2d创建注册可训练权重与F.conv2d使用传入权重直接计算，groups=1时weight=[Cout,Cin,kh,kw]、bias=[Cout]，参数量=Cout×Cin×kh×kw+Cout，空间尺寸与batch数量不增加参数。
+
+**D06 实现框架：`lessons/17_conv_pool.py`**。seed42，float32/CUDA，输入/核/偏置同设备。无下载、数据加载、分类训练或新checkpoint要求；本章只验收前向核心计算及Shape，反向实验为可选。
+
+| 顺序与目的 | 输入/输出和实现框架 | API、参数与副作用 | 核心自查 |
+|---|---|---|---|
+| 1. 固定小输入 | X为1–16按行排成[4,4]，K=[[1,0],[-1,2]]为[2,2]，本轮bias=.5 | arange(start,end,dtype,device)右端不含；reshape调整Shape；tensor创建核 | 所有浮点Tensor同dtype/device；无padding、stride1时左上窗口输出8.5仅作教学示例，不要求预测注释 |
+| 2. 手写单通道前向 | 建议接口conv2d_single(x,kernel,bias=0.0,stride=1,padding=0)→二维Tensor；仅单图单通道、整数对称padding/stride、dilation1。补零→计算Hout/Wout→分配输出→按输出i/j定位输入i*s/j*s窗口→逐元素乘核/求和/加偏置→保存结果 | F.pad(input,pad,mode='constant',value=0)，二维pad顺序(left,right,top,bottom)；zeros(size,dtype=x.dtype,device=x.device)准备输出；Tensor切片、乘法、sum实现窗口核心 | 核不翻转，bias每输出位置加一次；F.pad可用，F.conv2d/unfold不能代替本轮手写核心；返回正确二维Shape，不要求通用框架/边界工程 |
+| 3. 对照stride/padding | 对同X/K/bias，(s,p)=(1,0)/(2,0)/(1,1)/(2,1)，输出[3,3]/[2,2]/[5,5]/[3,3] | F.conv2d(input,weight,bias,stride,padding)仅用于手写函数外对照；X加batch/channel轴为[1,1,4,4]、K变[1,1,2,2]，bias为[1]Tensor；输出选[0,0]回二维 | 每组打印Shape、最大绝对误差与allclose，使用同核/同偏置、只补一次padding，近似容差可用atol1e-5/rtol1e-4；不要求手算完整输出 |
+| 4. 多通道与参数 | 随机输入[2,2,5,5]，官方Conv2d(2,3,kernel_size=3,stride=2,padding=1,bias=True)，输出[2,3,3,3] | 模块整体to设备后调用；dilation1/groups1默认，weight=[3,2,3,3]、bias=[3]；parameters/numel计算57参数 | 每个输出通道融合所有输入通道，权重跨batch/空间共享；这里是新随机可训练模块，不要求它等于前面固定K的结果 |
+| 5. 池化 | 将上一步同一卷积特征分别输入MaxPool2d与AvgPool2d，kernel_size2/stride2/padding0/ceil_modeFalse，两个输出均[2,3,1,1] | 创建池化模块再传入Tensor；stride默认等于kernel_size，本轮显式2；两种池化分别接相同卷积输出，不串联 | N/C不变、只缩小H/W，pooling无学习参数，余下不足完整窗口的位置按floor规则处理；首块窗口max/mean可直接对照Tensor局部统计 |
+
+任务意义是将公式、滑窗索引、API形状与图像特征流对应，为D07的CNN/残差网络准备。必须由学生写窗口核心并运行参考对照；仅提供接口、公式、文字与不可执行伪代码，不写完整函数。完成后按真实数值与Shape验收，不设优化速度/训练精度门槛，不要求增加多通道手写、dilation/groups分支或附加变体。
+
 **验收项目 P-D**：完整图像分类工程（小数据集，禁止以 SOTA 为目标）。必须至少包含 `model.py`、`train.py`、`evaluate.py`、配置、训练日志、checkpoint、README、至少 3 个有意义的测试。学生自己实现核心类/训练循环。
 
 ## 8. 阶段 E：Transformer、语言建模与 mini-GPT（E01–E14）
