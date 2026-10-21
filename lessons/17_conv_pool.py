@@ -19,7 +19,7 @@ padding2 = int(1)
 stride3 = int(2)
 padding3 = int(1)
 
-def conv2d_single(x, kernel, bias=0.5, stride=1, padding=0):
+def conv2d_single(x, kernel, bias=0.5, stride=1, padding=padding):
     print(f"h, w before padding = {x.shape}")
     src = F.pad(x, (padding, padding, padding, padding), mode="constant", value=0)
     # print(f"src.device = {src.device}")
@@ -43,7 +43,7 @@ def conv2d_single(x, kernel, bias=0.5, stride=1, padding=0):
     return output
 
 def maxpool2d_single(x, kernel_size=2, stride=1, padding=0):
-    src = F.pad(x, (padding, padding, padding, padding), mode="constant", value=0)
+    src = F.pad(x, (padding, padding, padding, padding), mode="constant", value=float("-inf"))
     h, w = src.shape
     print(f"h, w after padding = {src.shape}")
     kh = kernel_size
