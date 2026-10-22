@@ -287,6 +287,20 @@ DeepLearningLab/
 
 任务意义是将公式、滑窗索引、API形状与图像特征流对应，为D07的CNN/残差网络准备。必须由学生写窗口核心并运行参考对照；仅提供接口、公式、文字与不可执行伪代码，不写完整函数。完成后按真实数值与Shape验收，不设优化速度/训练精度门槛，不要求增加多通道手写、dilation/groups分支或附加变体。
 
+**D07 本轮组织（2026-10-22）**：把已学Conv/BN/分类/验证流程组成小型残差CNN。先讲CNN从局部特征到类别logits的数据流，再定义残差主分支R(x)、shortcut S(x)与输出ReLU(R(x)+S(x))；identity捷径适用于相同通道/stride1，通道或分辨率变化时用1×1卷积+BN投影。相加前两路Shape必须完全一致，不能依赖广播；禁止在捷径detach输入。说明加法节点的identity梯度项，最终梯度仍受后续激活等影响，不宣称梯度永不消失。BN2d对NCHW的每通道沿N/H/W统计；AdaptiveAvgPool2d((1,1))对每通道空间求均值，flatten(start_dim=1)保留batch，再接Linear输出类别分数。
+
+**D07 实现框架：`lessons/18_cnn_residual.py`**。只用本地合成数据，不下载/安装torchvision，不使用现成ResNet替代手写模块。数据准备seed42，模型创建前seed123，float32输入/long标签、实际运算统一CUDA。两种shortcut均需在同一分类器中体现；不要求普通CNN消融对照、速度优化或固定分类精度。
+
+| 顺序与意义 | 输入/输出与实现要求 | 相关API及副作用 | 核心自查 |
+|---|---|---|---|
+| 1. 图像数据与固定划分 | 三类各32张[1,16,16]模板：0垂直条纹(列6:10为1)，1水平条纹(行6:10为1)，2十字(上述两处均设1、交叉处仍1)，背景0；分别加0.2标准正态独立像素噪声。每类randperm32固定分为16/8/8，train/val/test=48/24/24，保留原始索引 | zeros/tensor切片赋值构造模板，randn_like(input)返回同Shape/dtype/device噪声，full生成long标签，cat/randperm按已有方式分层；先CPU准备再统一迁移 | 输入[96,1,16,16]、标签[96]，各划分互斥且配对；噪声每样本独立，不将同一已加噪样本复制跨集合；本轮测试只反映模板噪声分布 |
+| 2. 学生手写残差块 | 建议ResidualBlock(in_channels,out_channels,stride=1)。主分支Conv3×3(in→out,stride=s,pad1,biasFalse)→BN2d(out)→ReLU→Conv3×3(out→out,stride1,pad1,biasFalse)→BN2d(out)。shortcut同通道且s1时Identity，否则Conv1×1(in→out,stride=s,pad0,biasFalse)→BN2d(out)。最后两路相加再ReLU | 新子模块在__init__创建并注册，forward组织两路；nn.Identity保持输入，无学习参数；Conv1×1为每空间位置学习通道映射，stride可下采样；默认非原地ReLU | identity块8→8/s1保持[B,8,16,16]；投影块8→16/s2两路均[B,16,8,8]，确认相加的是原输入或其投影，梯度不detach |
+| 3. 分类器组装 | 入口Conv1→8(3×3,s1,p1,biasFalse)→BN2d8→ReLU；块A8→8/s1；块B8→16/s2；全局平均池化→flatten→Linear16→3 | BatchNorm2d(num_features)保持NCHW、按通道统计并维护running buffers；AdaptiveAvgPool2d(output_size=(1,1))指定目标尺寸，不是核大小；torch.flatten(input,start_dim=1)合并特征轴、保留N | Shape依次[B,1,16,16]→[B,8,16,16]→[B,8,16,16]→[B,16,8,8]→[B,16,1,1]→[B,16]→[B,3]，末层原始logits |
+| 4. 小规模训练与评估 | 模型统一CUDA后AdamW(lr=.01,weight_decay=0)，CE，train batch16/shuffleTrue/num_workers0，每epoch3次更新，共20epoch。首个真实训练batch在backward后观察主分支和投影参数梯度及一次更新；不额外要求完整梯度测试 | 可复用学生Dataset；可选TensorDataset(X,y)逐样本返回元组，输入首轴必须相同；DataLoader组织批次。每epoch开头train，只有train执行backward/step；评估直接复用evaluate(model,X,y,loss_fn)→float loss/acc | 梯度存在有限、至少参数变化，不能要求全部非零。训练前epoch0及每epoch结束eval/no_grad重算完整train/val CE/accuracy，记录21点，日志每5epoch即可 |
+| 5. 最佳状态和最终测试 | 按已评估轮次最低val CE保存best_epoch/best_val_loss及deepcopy(state_dict)，包含BN buffers；20epoch结束恢复最佳状态，再仅一次评估test | state_dict含参数和running统计，deepcopy独立快照；load_state_dict载入现有模型后eval/no_grad；不要求落盘/恢复优化器或训练调度 | 验证不更新BN，测试不参与调参；报告初始/最终train-val、最佳epoch/val和test结果，不能由同模板加噪数据推断真实图像泛化 |
+
+验收聚焦图像NCHW数据、两种shortcut及逐元素残差相加、全局池化分类头、正确梯度/训练与验证选择；无固定准确率/损失门槛、完整ResNet家族或额外数据集项目要求。学生根据自己的模块结构解释一处identity和一处projection为什么能相加即可，接受聊天回答，不强制预测注释；代码已清楚展示正确数据流时不重复设置问答关卡。
+
 **验收项目 P-D**：完整图像分类工程（小数据集，禁止以 SOTA 为目标）。必须至少包含 `model.py`、`train.py`、`evaluate.py`、配置、训练日志、checkpoint、README、至少 3 个有意义的测试。学生自己实现核心类/训练循环。
 
 ## 8. 阶段 E：Transformer、语言建模与 mini-GPT（E01–E14）

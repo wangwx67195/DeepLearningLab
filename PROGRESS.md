@@ -51,12 +51,12 @@
 
 | 字段 | 当前内容 |
 |---|---|
-| 当前主要课程 | D06 — 卷积、padding、stride、池化与输出形状 |
-| 实际作业 | D06 已验收文件为 `lessons/17_conv_pool.py`；此前作业保留 |
-| 作业状态 | D06 `PASSED`（手写卷积四配置参考一致，多通道/参数量/原定池化正确）；D07 未开始；额外手写最大池化的非零padding语义留作非阻塞修正建议 |
-| 通过验收的课次 | `C01`、`C02`、`C03`、`C04`、`C05`、`C06`、`C07`、`C08`、`C09`、`C10`、`C11`、`D01`、`D02`、`D03`、`D04`、`D05`、`D06`（含 C11 CUDA 核心补充；不等同于全部内容无需提示的独立熟练或所有工具均已实践） |
-| 当前里程碑 | P-C 已通过；D 阶段 D06 已通过；长期 P-E 是独立 mini-GPT |
-| 下一个最小动作 | 用户请求后开展D07 CNN/ResNet/跳跃连接；D06 无必须补交任务。额外maxpool2d_single若对齐PyTorch的padding>0定义，应以负无穷补边，当前非零padding扩展不认定普遍正确 |
+| 当前主要课程 | D07 — CNN图像分类器、残差块与跳跃连接 |
+| 实际作业 | D07 已验收文件为 `lessons/18_cnn_residual.py`；此前作业保留 |
+| 作业状态 | D07 `PASSED`（两种残差捷径、数据划分、60次更新、BN评估状态与最佳完整状态恢复/单次测试均验证）；D08未开始；P-C保持 `PASSED` |
+| 通过验收的课次 | `C01`、`C02`、`C03`、`C04`、`C05`、`C06`、`C07`、`C08`、`C09`、`C10`、`C11`、`D01`、`D02`、`D03`、`D04`、`D05`、`D06`、`D07`（含 C11 CUDA 核心补充；不等同于全部内容无需提示的独立熟练或所有工具均已实践） |
+| 当前里程碑 | P-C 已通过；D阶段D07已通过；长期P-E是独立mini-GPT；P-D整体工程尚未验收 |
+| 下一个最小动作 | 用户请求后开展D08可重复性、checkpoint、日志/指标及训练恢复；D07无必须补交任务。best_epoch为零基计数，17对应完成第18轮；初值追加到历史为可选展示整理 |
 
 ## 3. 已讲解但尚未通过的知识
 
@@ -76,6 +76,8 @@
 - 2026-10-17 学生补充：任务布置应提供明确实现框架，按依赖顺序逐块列出目的、输入输出（Shape/dtype/device）、操作步骤、API 参数/返回值/副作用和使用位置、核心自查点；配合主流程伪代码及必要接口/记录字段，指出当前第一步。函数化为可选组织方式，不代写完整答案，不降低难度或追加验收门槛。已同步到 AGENTS.md 与 LEARNING_PLAN.md。
 
 ### 尚未完整验收的内容
+
+- D07在Session086通过：学生在Session085原理/API/框架讲解后实现完整小残差CNN，identity与投影两路Shape一致且真实相加，数据/梯度/BN评估/最佳完整状态恢复与最终一次测试正确。尚无学生独立口头推导残差梯度的证据，不据此声称完整ResNet家族、真实视觉泛化或无提示迁移均熟练。初始指标只打印、20轮指标存列表；当前最佳验证结果不受影响，追加初始记录留可选整理。
 
 - D06 在Session084通过：学生在Session083原理/API/框架提示后完成手写单通道卷积、四组stride/padding参考对照、多通道与原定padding0池化。额外手写max/avg池化在当前正输入上亦匹配，但maxpool2d_single对padding>0使用0而非负无穷，已复现负输入错误；此扩展非原章必做，不阻塞主任务通过，也不能记录为通用池化已正确实现。跨设备/dtype通用性与反向未验收，未据通过推断全程无提示熟练。
 
@@ -112,6 +114,8 @@
 ## 5. 掌握证据与待补修点
 
 ### 已验收
+
+- D07：Session086 CUDA完整执行20epoch/60次AdamW更新通过，模型5003个参数元素/20个参数张量；初始train/val CE=1.0997440814971924/1.0990586280822754，准确率均约1/3；第20轮train CE=.0027334222104400396、val CE=.0028913766145706177，准确率均1.0。最佳epoch索引17（第18轮），val CE=.0026979537215083838，恢复后复算一致。只在60次更新后、载入含BN buffers的最佳状态时调用test一次，CE=.0029932595789432526、24/24正确。train/val/test为48/24/24，类别计数16/8/8各三类、索引互斥配对；所有更新梯度存在有限，首步20个参数张量均改变。两种残差块共观察206次，Shape/相加后ReLU均核验，评估始终不改BN buffers。仅为当前合成图像分布实验，P-D工程未整体验收。
 
 - D06：Session084在dllab CUDA完整执行一次通过。X=[4,4]、核[2,2]、bias[1]=.5；(stride,padding)=(1,0)/(2,0)/(1,1)/(2,1)手写输出分别[3,3]/[2,2]/[5,5]/[3,3]，与学生F.conv2d参考最大绝对误差均0，左上基础输出8.5。多通道输入[2,2,5,5]→卷积[2,3,3,3]，weight[3,2,3,3]、bias[3]、57参数；同一输出分别MaxPool/AvgPool为[2,3,1,1]，窗口最大/均值数值核验正确、池化无参数。额外手写池化正输入对照通过不覆盖负值padding语义，见Session084。
 
@@ -968,6 +972,30 @@
 - **扩展池化真实问题**：学生额外实现maxpool2d_single/avgpool2d_single，并在当前全正输入上运行四种s/p；导师对照官方函数，八项最大误差均0。但第46行maxpool2d_single用0补边，与官方非零padding时的负无穷定义不同。对[[-1,-2],[-3,-4]]、kernel2/stride1/padding1调用学生函数，左上输出0，官方为-1，整图最大绝对误差4，真实复现。解释0会错误压过负数，应将最大池化的补值改成负无穷；不能把它与卷积/默认计入padding的平均池化统一为0。未替学生修改。
 - **验收结论与范围**：D06 PASSED，原定手写卷积/stride/padding、官方多通道与padding0池化均正确。额外手写池化的padding>0语义为非原章必做扩展，明确记录错误并给出方向，不追加通用负值池化实现关卡、不要求为主章通过重交；不声称整文件所有扩展情况均正确。硬编码CUDA/float32、重复对照段落、未使用变量等不作为阻塞项。
 - **来源 / 下一步 / Git**：核对官方PyTorch2.10 MaxPool2d文档的负无穷padding语义；用户请求后开展D07。仅自动更新学习进度，不改学生文件/依赖或执行Git同步，不宣称已检查远端。
+
+### Session 085 — 2026-10-22（D07 开课：小型残差CNN图像分类）
+
+- **恢复与授权**：学生请求下一课；重读AGENTS.md、教学skill、当前进度与实际Session084、D07及D阶段规划和文件清单。D06主任务保持PASSED，额外最大池化padding问题不追加关卡；尚无D07文件。编辑前本地git status干净，不据此宣称检查远端同步。
+- **环境与来源**：dllab Python实测3.11.17、Torch2.10.0+cu128、Torch CUDA12.8可用，GPU RTX PRO6000 Blackwell；核对本地BN2d/AdaptiveAvgPool2d/Identity/TensorDataset接口。查阅原始ResNet论文arXiv1512.03385全文HTML、官方2.10对应API/flatten/data/randn_like文档；未安装依赖或运行本次任务，不引入torchvision/下载。
+- **内容与意义**：将D03分类输出、D04验证选择、D05 BN与D06卷积组合为图像分类器。残差块记主分支R和shortcut S，输出ReLU(R(x)+S(x))，主分支学习相对捷径的修正；identity的加法节点梯度含I+J_R，后续ReLU等仍影响最终梯度，不宣称永不消失。同Shape使用identity；通道/分辨率变化时1×1卷积+BN投影，并要求两路Shape完全一致而非广播。1×1卷积学习跨通道映射，stride2同时下采样。
+- **关键API用法**：BN2d输入NCHW、每通道在N/H/W上统计，默认运行状态与已学BN1d规则一致；Identity返回输入、无参数；AdaptiveAvgPool2d((1,1))指定目标高宽，每通道空间均值；flatten(start_dim1)保留batch。卷积接BN时本轮biasFalse，ReLU使用默认非原地，子模块在__init__注册、forward组织，不在捷径detach。可选TensorDataset包装同首轴X/y，DataLoader返回样本批；自定义Dataset可保留，不强制重构。
+- **任务/数据**：新建lessons/18_cnn_residual.py，数据seed42，三类各32张[1,16,16]模板，背景0、条纹1：0列6:10为垂直条纹、1行6:10为水平条纹、2两处均为1的十字；交叉处仍1。每像素独立加入0.2×标准正态噪声，用zeros、切片、randn_like/full/cat；每类randperm32分16/8/8，train/val/test总48/24/24，索引互斥且固定，float32输入/long标签，CPU准备后统一CUDA。报告范围仅模板加噪分布，不推广真实视觉泛化。
+- **任务/模块框架**：ResidualBlock(in_channels,out_channels,stride=1)：主路Conv3×3(in→out,s=stride,p1,biasFalse)→BN2d→ReLU→Conv3×3(out→out,s1,p1,biasFalse)→BN2d；捷径在同通道且stride1时Identity，否则Conv1×1(in→out,s=stride,p0,biasFalse)→BN2d；相加后ReLU。模型入口Conv1→8(k3,s1,p1,biasFalse)+BN8+ReLU，块A8→8/s1，块B8→16/s2，全局平均池化，flatten，Linear16→3。Shape链[B,1,16,16]→[B,8,16,16]→[B,8,16,16]→[B,16,8,8]→[B,16,1,1]→[B,16]→[B,3]；仅给签名/公式/框架，不提供完整实现。
+- **任务/训练评估**：模型创建前seed123，整体CUDA后AdamW lr.01/wd0，CE，train batch16/shuffleTrue/num_workers0，各epoch3次更新，共20epoch。第一个实际训练batch在backward后核对主/投影分支梯度有限及至少参数变化，不要求额外梯度测试或所有梯度非零。epoch0及每epoch结束eval/no_grad重算完整train/val CE/accuracy，记录21点、每5epoch日志；每epoch训练前train。按最低val CE deepcopy整个state_dict（含BN buffers），结束restore最佳状态，仅一次test，不依据测试反馈调参，无落盘/恢复优化器要求。
+- **验收范围与状态**：核心为NCHW数据、identity/投影两种捷径与实际相加、分类头、有效梯度更新和正确验证选择；不设精度/损失门槛，不要求预训练模型、完整ResNet家族、普通CNN消融对比或新的工程项目。依学生新规则逐块说明目的/输入输出/步骤/API/自查；函数化可选、模型类由学生手写。D07 EXPLAINED，未据讲解或接口检查提升熟练度。
+- **下一步 / Git**：先完成数据与两路残差块，再按Shape表组装并训练，完成后集中审阅；仅更新规划与进度，未代写学生代码、改环境或执行Git同步。
+
+### Session 086 — 2026-10-22（D07 小型残差CNN综合验收通过）
+
+- **恢复与提交**：重读AGENTS.md、教学skill、当前进度与实际Session085、D07规划框架，查看学生lessons/18_cnn_residual.py；保留已有LEARNING_PLAN.md/PROGRESS.md未提交修改与学生未跟踪文件，不改写模型或训练源码。
+- **静态核心正确**：三类各32张[1,16,16]模板、每像素独立噪声.2，十字交叉处仍1；学生直接在CUDA生成，满足当前计算要求。每类共用同一随机局部排列再加类别偏移，实际样本噪声独立、三集合互斥且平衡，不要求改为各类另取排列。TensorDataset与训练loader正确；identity/1×1Conv+BN投影由通道/stride条件选择，主分支两层3×3Conv/BN和中间ReLU，末尾相加后ReLU，未detach，assert两路Shape一致。入口/两个块/AdaptiveAvgPool/flatten(start_dim1)/Linear分类头均正确。
+- **真实运行与环境**：dllab Python经runpy完整执行学生文件一次，退出码0；在导师临时工作目录承接best_model.pt，核验落盘状态与内存最佳状态相同后自动清理，不覆盖仓库同名文件。验证进程临时包装AdamW.step检查梯度/首步变化，Python profile观察学生残差forward与evaluate的输入输出、BN buffers、测试调用时点；finally恢复原方法/profile/工作目录。Python3.11.17、Torch2.10.0+cu128、CUDA12.8可用，GPU RTX PRO6000 Blackwell；未安装依赖或执行其他训练。
+- **数据与结构证据**：索引合并排序恰为0–95，实际图像/标签与原始全局索引对应；train=[48,1,16,16]、val/test=[24,1,16,16]，标签[48]/[24]/[24] long，同CUDA float32图像，各类计数[16,16,16]/[8,8,8]/[8,8,8]。模型5003个可学习元素、20个参数张量；优化器绑定其参数，lr.01、wd0。观察两个残差块共206次调用，每次main/shortcut/output Shape相同且输出等于ReLU(main+shortcut)；特征Shape对应Identity [B,8,16,16]→同Shape、投影[B,8,16,16]→[B,16,8,8]。
+- **训练与评估证据**：实际60次更新，所有参数每次grad存在、Shape对应且有限，首步20个参数张量均变化。evaluate共43次（初始train/val、20轮各train/val、最终test），均无梯度、模型处eval，前后所有BN buffers不变。学生六条历史各20项（只存更新后轮次），与观察到的每轮完整数据指标一致；初始指标实际打印，未写入列表，不作为通过阻塞。
+- **实际结果与选择**：初始train CE=1.0997440814971924、acc=.3333333432674408；val CE=1.0990586280822754、acc=.3333333432674408。第20轮train CE=.0027334222104400396、acc1.0；val CE=.0028913766145706177、acc1.0。最低val CE=.0026979537215083838，对应零基epoch17即第18轮；保存/恢复的参数和BN状态与该最低值对应，导师另行eval/no_grad复算val一致，未另算test。
+- **测试与完整状态证据**：test调用仅一次，发生在60次更新之后，进入时model.state_dict全部项与独立best_state相同；test CE=.0029932595789432526、correct24、acc1.0。内存快照与参数不共享data_ptr，临时目录中的检查点与快照一致。学生已经扩展落盘保存，但未据此把D08训练恢复提前标记通过。
+- **验收结论与非阻塞建议**：D07 PASSED，无必须补交任务，不追加口头/注释/消融关卡。epoch打印可用epoch+1改善可读性，17表示已完成18轮；max_val_loss实际保存最低值，可日后改名best_val_loss，初始指标追加历史为可选整理。forward中新建无参数无模式差异的ReLU对象不影响正确性，不强制重构。当前结果只支持合成模板噪声分布，未验证真实图像泛化、普遍残差优越性或学生独立理论推导。
+- **下一步 / Git**：用户请求后开展D08可重复性、checkpoint、日志/指标与训练恢复；P-D整体工程仍未验收。仅更新进度与证据，未修改学生源码、依赖或执行Git同步，不宣称已检查远端。
 
 ## 7. 后续 Session 模板（复制本段追加，不要覆盖历史）
 
