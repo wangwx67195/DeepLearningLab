@@ -3,6 +3,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import TensorDataset, DataLoader
 from copy import deepcopy
+from pathlib import Path
+
+OUTPUT_DIR = Path(__file__).resolve().parent / "outputs"
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 gpu = "cuda"
 cpu = "cpu"
@@ -208,7 +212,7 @@ for epoch in range(20):
             max_val_loss = val_loss_value
             best_state["state"] = deepcopy(model.state_dict())
             best_state["epoch"] = epoch
-            torch.save(best_state, "best_model.pt")
+            torch.save(best_state, OUTPUT_DIR / "best_model.pt")
 
         train_loss_list.append(train_loss_value)
         train_correct_list.append(train_correct_value)

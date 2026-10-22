@@ -1,6 +1,10 @@
 import torch
 import torch.nn as nn
 import copy
+from pathlib import Path
+
+OUTPUT_DIR = Path(__file__).resolve().parent / "outputs"
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 gpu = "cuda"
 cpu = "cpu"
@@ -168,7 +172,7 @@ with torch.no_grad():
             best_val_1_loss = loss_eval
             best_state_1 = copy.deepcopy(model_1.state_dict())
             best_1 = {"model_state_dict": best_state_1, "epoch": 0}
-            torch.save(best_1, "model_1.pt")
+            torch.save(best_1, OUTPUT_DIR / "model_1.pt")
             best_val_1_loss = loss_eval
 
 model_1.train()
@@ -201,7 +205,7 @@ for epoch in range(400):
                 best_epoch_1 = epoch + 1
                 best_state_1 = copy.deepcopy(model_1.state_dict())
                 best_1 = {"model_state_dict": best_state_1, "epoch": best_epoch_1}
-                torch.save(best_1, "model_1.pt")
+                torch.save(best_1, OUTPUT_DIR / "model_1.pt")
 
             train_1_loss_list.append(train_1_loss)
             train_1_acc_list.append(train_1_acc)
@@ -231,7 +235,7 @@ with torch.no_grad():
             best_val_2_loss = loss_eval
             best_state_2 = copy.deepcopy(model_2.state_dict())
             best_2 = {"model_state_dict": best_state_2, "epoch": 0}
-            torch.save(best_2, "model_2.pt")
+            torch.save(best_2, OUTPUT_DIR / "model_2.pt")
             best_val_2_loss = loss_eval
 
 model_2.train()
@@ -264,7 +268,7 @@ for epoch in range(400):
                 best_epoch_2 = epoch + 1
                 best_state_2 = copy.deepcopy(model_2.state_dict())
                 best_2 = {"model_state_dict": best_state_2, "epoch": best_epoch_2}
-                torch.save(best_2, "model_2.pt")
+                torch.save(best_2, OUTPUT_DIR / "model_2.pt")
 
             train_2_loss_list.append(train_2_loss)
             train_2_acc_list.append(train_2_acc)
@@ -287,12 +291,12 @@ print(f"val_2_acc_list: {val_2_acc_list}")
 with torch.no_grad():
     if best_val_1_loss <= best_val_2_loss:
         max_model_index = 1
-        state_dict1 = torch.load("model_1.pt", map_location = cpu, weights_only = True)
+        state_dict1 = torch.load(OUTPUT_DIR / "model_1.pt", map_location = cpu, weights_only = True)
         model_1.load_state_dict(state_dict1["model_state_dict"], strict = True)
         final_loss, final_acc = evaluate(model_1, test_dataset, Loss_fn)
     else: 
         max_model_index = 2
-        state_dict2 = torch.load("model_2.pt", map_location = cpu, weights_only = True)
+        state_dict2 = torch.load(OUTPUT_DIR / "model_2.pt", map_location = cpu, weights_only = True)
         model_2.load_state_dict(state_dict2["model_state_dict"], strict = True)
         final_loss, final_acc = evaluate(model_2, test_dataset, Loss_fn)
 

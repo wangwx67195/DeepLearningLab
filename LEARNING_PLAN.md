@@ -50,7 +50,7 @@
 - 环境不兼容时，先给出证据、原因、最小修复方案，再让学生执行；不要无缘无故修改 CUDA、Torch 版本。
 - GPU 大显存只影响可运行的实验规模，不应跳过基础训练。默认使用 CPU 或很小的 GPU 张量学习，逐步扩大。
 
-### 1.3 推荐逐步扩展的目录（不是立即要求创建）
+### 1.3 目录组织（课程目录于2026-10-23更新，其他项目按需扩展）
 
 ```text
 DeepLearningLab/
@@ -60,7 +60,18 @@ DeepLearningLab/
 ├── .agents/skills/deep-learning-mentor/SKILL.md
 ├── README.md                         # 学生已有；不覆盖
 ├── lessons/
-│   ├── 01_tensor.py                  # 第一份拟提交作业（不假定存在）
+│   ├── c01/
+│   │   ├── 01_tensor.py              # 保留学生原脚本名
+│   │   └── outputs/                  # 本课运行产物
+│   ├── c11/                         # 同课可有 CPU/CUDA 多份脚本
+│   ├── d01/
+│   │   ├── 12_mlp.py
+│   │   └── outputs/
+│   ├── d08/                         # 已有多模块课程
+│   │   ├── train.py                  # 入口，其他模块与它同层
+│   │   ├── ...
+│   │   └── outputs/
+│   ├── INDEX.md                     # 课程与迁移路径对照
 │   ├── ...
 │   └── notes/                        # 可选：学生自己的笔记
 ├── nanoGPT/                          # 学生已有；先检查后再决定如何使用
@@ -75,7 +86,11 @@ DeepLearningLab/
 └── tests/                            # 后续：算法正确性测试
 ```
 
-**不要一次创建所有目录**；课程进展到对应专题时，学生应亲自解释为何引入目录并创建它。`nanoGPT/` 和未来的 `projects/mini_gpt/` 可分别用作参考阅读和本人手写实现（若已有内容不符，先协商命名）。
+除学生已授权整理的现有课程外，**不要提前创建所有未来项目目录**；课程进展到对应专题时，学生应亲自解释为何引入目录并创建它。`nanoGPT/` 和未来的 `projects/mini_gpt/` 可分别用作参考阅读和本人手写实现（若已有内容不符，先协商命名）。
+
+### 1.4 课程代码与产物约定（2026-10-23 学生更新）
+
+统一使用 `lessons/<小写课程ID>/` 存放本课代码、其 `outputs/` 存放检查点/缓存/日志/图表；多份练习或模块可同属一课，保留学生原有脚本名与实现。课程与旧路径的完整对照见 `lessons/INDEX.md`。代码按文件所在位置定位产物，不依赖启动工作目录；D08已有config.py集中管理路径。`outputs/.gitkeep`用于Git保留空目录，模型文件继续遵守现有忽略规则。当前规划使用新路径；历史进度Session保留原路径与当时事实，通过索引追溯。目录迁移不代表重跑或重新验收，不改变本章算法要求。
 
 ## 2. 核心教学契约（所有 Agent 必须遵守）
 
@@ -202,7 +217,7 @@ DeepLearningLab/
 
 | 课次 | 学习主题 | 学生亲手任务 |
 |---|---|---|
-| C01 | Tensor 构造、dtype、device、shape、索引、切片 | **先完成初始作业 `lessons/01_tensor.py`** |
+| C01 | Tensor 构造、dtype、device、shape、索引、切片 | **先完成初始作业 `lessons/c01/01_tensor.py`** |
 | C02 | `reshape`、`view`、`permute`、`transpose`、`unsqueeze`/`squeeze` | 明确每一步维度变化 |
 | C03 | 广播、`@`/matmul、`einsum` 入门 | 手算小尺寸批量矩阵乘法 |
 | C04 | 设备、CPU↔CUDA、非原地与原地操作、`.to()` | 检测 device mismatch 并修复 |
@@ -216,7 +231,7 @@ DeepLearningLab/
 
 **C11 当前设备安排（2026-10-14）**：Windows CPU 环境先集中学习 traceback/shape 检查、非有限数值、Tensor 存储大小、有限差分与 gradcheck、CPU 小规模基准计时。综合练习使用已有线性回归公式，不重复训练/保存流程；CUDA 监测、显存分配与缓存及 GPU 异步计时在具备 CUDA 设备时补实践，不能由 CPU 作业推断已掌握。通过聚焦当前环境的核心调试与检查能力，不要求制造大量错误或长时间性能实验。
 
-**C11 CUDA 补充与 P-C 核对（2026-10-14，恢复 Ubuntu 22.04/CUDA 12.8）**：保留 C11 CPU 通过及既有训练成果。P-C 的手写 Linear/MSE/SGD 已有 C08–C10 验收证据，补讲并确认 train/eval 与 no_grad 的区别，不要求另写完整训练项目。学生另建 `lessons/11_cuda_check.py`，用两个 512×512 CUDA float32、无需梯度的 Tensor 做一次矩阵乘法；观察张量存储大小、memory_allocated/memory_reserved、释放输出与一次 empty_cache 的变化，再用已有 Timer 做短时 GPU 计算基准，理解异步执行与同步。验收聚焦正确含义与可运行实验，不要求特定显存数值或速度、不重复 CPU gradcheck；完成后集中核对 P-C，再由用户请求进入 D 阶段。
+**C11 CUDA 补充与 P-C 核对（2026-10-14，恢复 Ubuntu 22.04/CUDA 12.8）**：保留 C11 CPU 通过及既有训练成果。P-C 的手写 Linear/MSE/SGD 已有 C08–C10 验收证据，补讲并确认 train/eval 与 no_grad 的区别，不要求另写完整训练项目。学生另建 `lessons/c11/11_cuda_check.py`，用两个 512×512 CUDA float32、无需梯度的 Tensor 做一次矩阵乘法；观察张量存储大小、memory_allocated/memory_reserved、释放输出与一次 empty_cache 的变化，再用已有 Timer 做短时 GPU 计算基准，理解异步执行与同步。验收聚焦正确含义与可运行实验，不要求特定显存数值或速度、不重复 CPU gradcheck；完成后集中核对 P-C，再由用户请求进入 D 阶段。
 
 **验收项目 P-C**：只使用小规模 Tensor，自己写 `Linear` → `MSE` → `SGD` 最小训练流程；梯度与 loss 正确；解释 `model.train()` 与 `model.eval()` 的含义。
 
@@ -245,9 +260,9 @@ DeepLearningLab/
 
 **D02 本轮组织（2026-10-15）**：复用 D01 的 2→4→1 模型及四条回归数据，以四组同起点实验联系 SGD、AdamW 的历史梯度统计、解耦权重衰减和 StepLR。每组模型创建前重新设置种子 42，使用独立模型/优化器，统一初始 lr=0.05，每轮全量四样本一次更新，共 200 轮；依次比较 SGD(wd=0)、AdamW(wd=0)、AdamW(wd=0.1)、AdamW(wd=0.1)+StepLR(step_size=50,gamma=0.5)。记录训练前及每次更新后的全数据 MSE、该轮实际使用 lr 和最终参数 L2 范数，形成曲线数据并用表格比较，绘图为可选，不要求安装依赖。验收控制变量、参数更新、衰减配置、调度位置/频率和记录含义；不预设哪组获胜、不设低损失门槛、不据四点训练误差推断泛化，不要求手写 AdamW 内核或大规模调参。
 
-**D03 本轮组织（2026-10-16）**：以三簇二维合成点完成互斥三分类，先说明类别编号与连续回归目标的区别，再联系 logits→softmax 概率→负对数似然、稳定的交叉熵计算和 argmax/accuracy；分类索引标签为 long [B]，原始 logits 为 float [B,3]，不在交叉熵前添加 softmax、argmax 或 detach。联系 B07，但不据此整模块验收。引入 nn.Linear，将已有手写 XW+b 对应到 X weight.T+b，解释权重存储 Shape 与子模块自动参数注册。任务为 lessons/14_classification.py：种子 42，三个中心 (-2,-2)/(2,-2)/(0,2)，每类 64 点，独立标准正态噪声乘 0.5；拼接得 X=[192,2] float32、y=[192] long。学生自建 2→16→3 MLP，隐藏 ReLU、输出原始 logits，默认 Linear 初始化；整模型与数据统一 CUDA，之后创建 AdamW(lr=0.02,weight_decay=0)，全批量训练 200 次。记录训练前/后及每 50 次更新后重新计算的全数据 CE 与 accuracy，最终展示少量概率、预测/真实类别与概率行和。本轮训练指标只描述已见数据拟合，train/val/test 与泛化实验留待 D04；不要求 DataLoader、绘图、指定精度门槛或手写损失内核。验收聚焦正确的数据/标签、分类输出与损失语义、梯度更新和指标计算，由学生亲写实现。
+**D03 本轮组织（2026-10-16）**：以三簇二维合成点完成互斥三分类，先说明类别编号与连续回归目标的区别，再联系 logits→softmax 概率→负对数似然、稳定的交叉熵计算和 argmax/accuracy；分类索引标签为 long [B]，原始 logits 为 float [B,3]，不在交叉熵前添加 softmax、argmax 或 detach。联系 B07，但不据此整模块验收。引入 nn.Linear，将已有手写 XW+b 对应到 X weight.T+b，解释权重存储 Shape 与子模块自动参数注册。任务为 lessons/d03/14_classification.py：种子 42，三个中心 (-2,-2)/(2,-2)/(0,2)，每类 64 点，独立标准正态噪声乘 0.5；拼接得 X=[192,2] float32、y=[192] long。学生自建 2→16→3 MLP，隐藏 ReLU、输出原始 logits，默认 Linear 初始化；整模型与数据统一 CUDA，之后创建 AdamW(lr=0.02,weight_decay=0)，全批量训练 200 次。记录训练前/后及每 50 次更新后重新计算的全数据 CE 与 accuracy，最终展示少量概率、预测/真实类别与概率行和。本轮训练指标只描述已见数据拟合，train/val/test 与泛化实验留待 D04；不要求 DataLoader、绘图、指定精度门槛或手写损失内核。验收聚焦正确的数据/标签、分类输出与损失语义、梯度更新和指标计算，由学生亲写实现。
 
-**D04 本轮组织（2026-10-17）**：承接 D03 的训练集 100% 准确率，讲解经验训练误差、未见同分布数据的泛化估计、过拟合/欠拟合、train/val/test 的不同信息用途与数据泄露。用同一固定分层划分比较网络宽度，不强求更宽模型过拟合或某组获胜。任务为 lessons/15_generalization.py：数据种子 42，沿用三中心与每类 64 点，将噪声系数从 0.5 改为 1.2；每类用一次 randperm(64) 划为 12/26/26 个 train/val/test，总数为 36/78/78，保留全局样本索引核对不交叠，X/y 同索引取样，划分后固定。两独立模型 A=2→8→3、B=2→128→3，各一层隐藏 ReLU、输出 logits；每组创建前 seed=123，模型 Shape 不同不要求初始参数相同，使用默认初始化。相同数据、AdamW(lr=0.01,weight_decay=0)、全训练集每轮一次更新、400 轮；只有 train 进入 backward/step。epoch 0 与每 20 次更新后，用当前参数 eval/no_grad 重算 train/val 的 CE 和 accuracy，记录 Python 数值。各组根据已评估轮次的最低 val CE 保留 best_epoch/best_val_loss 和独立参数快照（deepcopy(state_dict) 或逐张量 clone），第 400 轮指标单独保留。两组训练和验证选择均完成后，按最低 best_val_loss 选模型（相等时选 A），恢复该组最佳状态，最后仅评估选中模型的 test 一次，随后不据测试结果调参。说明 state_dict 的共享存储、load_state_dict 的原地恢复和返回值，不要求落盘或恢复优化器；D08 再处理完整 checkpoint。验收固定互斥划分、无验证/测试泄露、正确指标/最佳状态与验证选择协议，不设精度门槛，不要求绘图、DataLoader、归一化或特定曲线形状；学生用实际 train/val 趋势作简短解释，不能以一次差距或单次种子推广模型优劣。
+**D04 本轮组织（2026-10-17）**：承接 D03 的训练集 100% 准确率，讲解经验训练误差、未见同分布数据的泛化估计、过拟合/欠拟合、train/val/test 的不同信息用途与数据泄露。用同一固定分层划分比较网络宽度，不强求更宽模型过拟合或某组获胜。任务为 lessons/d04/15_generalization.py：数据种子 42，沿用三中心与每类 64 点，将噪声系数从 0.5 改为 1.2；每类用一次 randperm(64) 划为 12/26/26 个 train/val/test，总数为 36/78/78，保留全局样本索引核对不交叠，X/y 同索引取样，划分后固定。两独立模型 A=2→8→3、B=2→128→3，各一层隐藏 ReLU、输出 logits；每组创建前 seed=123，模型 Shape 不同不要求初始参数相同，使用默认初始化。相同数据、AdamW(lr=0.01,weight_decay=0)、全训练集每轮一次更新、400 轮；只有 train 进入 backward/step。epoch 0 与每 20 次更新后，用当前参数 eval/no_grad 重算 train/val 的 CE 和 accuracy，记录 Python 数值。各组根据已评估轮次的最低 val CE 保留 best_epoch/best_val_loss 和独立参数快照（deepcopy(state_dict) 或逐张量 clone），第 400 轮指标单独保留。两组训练和验证选择均完成后，按最低 best_val_loss 选模型（相等时选 A），恢复该组最佳状态，最后仅评估选中模型的 test 一次，随后不据测试结果调参。说明 state_dict 的共享存储、load_state_dict 的原地恢复和返回值，不要求落盘或恢复优化器；D08 再处理完整 checkpoint。验收固定互斥划分、无验证/测试泄露、正确指标/最佳状态与验证选择协议，不设精度门槛，不要求绘图、DataLoader、归一化或特定曲线形状；学生用实际 train/val 趋势作简短解释，不能以一次差距或单次种子推广模型优劣。
 
 **D04 实现框架提示（2026-10-17，原任务范围不变）**：以下功能块可写成函数，也可按脚本段落组织；两个现有模型类可保留，不要求重构。
 
@@ -262,7 +277,7 @@ DeepLearningLab/
 
 **D05 本轮组织（2026-10-18）**：承接 D04 首轮模式设置与过拟合现象，用小张量行为实验加一次模型更新讲解 BatchNorm、LayerNorm 和 Dropout，不要求重复分类训练曲线。先定义隐藏特征归一化与随机正则化的用途，再推导归一化的均值/方差统计轴、eps、可学习gamma/beta，区别参数与running buffers。对本轮[B,C]，BN训练按列统计，LN(C)逐行沿末轴统计；LN推广到[B,T,C]时仍每个token沿C计算。说明BN默认track_running_stats=True，训练使用当前batch并更新running_mean/var/num_batches_tracked，eval使用running统计且不更新；即使no_grad，train前向仍更新buffers。BN前向和LN方差使用correction=0，BN running_var更新用correction=1；BN momentum=0.1为统计EMA权重，不是优化器动量。LN两模式均使用当前样本统计，无running均值方差。Dropout(p=0.5)训练时随机置零并将保留值乘2，eval恒等，不删除参数或断开整个计算图；no_grad不关闭随机掩码。讲清model.train/eval与梯度模式两个独立开关。
 
-**D05 学生实现框架：`lessons/16_norm_dropout.py`**。脚本开头seed42，所有浮点数据与模块统一float32/CUDA，按以下顺序手写，功能块可按段落组织，不强制函数化。
+**D05 学生实现框架：`lessons/d05/16_norm_dropout.py`**。脚本开头seed42，所有浮点数据与模块统一float32/CUDA，按以下顺序手写，功能块可按段落组织，不强制函数化。
 
 | 顺序与目的 | 输入/输出与操作 | API 参数、返回值与副作用 | 核心自查 |
 |---|---|---|---|
@@ -275,7 +290,7 @@ DeepLearningLab/
 
 **D06 本轮组织（2026-10-21）**：以局部连接与空间权重共享说明卷积的图像建模用途，先讲单通道滑窗逐元素乘/求和/偏置，再扩展到NCHW、多输入通道求和与多个输出特征图。PyTorch Conv2d执行不翻转核的互相关，手写版本与其约定一致。明确stride是窗口起点步长、padding是边缘补零，dilation=1时输出高宽为floor((输入尺寸+2p-核尺寸)/s)+1；池化沿空间逐通道取最大/均值，不引入可学习参数，默认ceil_mode=False。区分nn.Conv2d创建注册可训练权重与F.conv2d使用传入权重直接计算，groups=1时weight=[Cout,Cin,kh,kw]、bias=[Cout]，参数量=Cout×Cin×kh×kw+Cout，空间尺寸与batch数量不增加参数。
 
-**D06 实现框架：`lessons/17_conv_pool.py`**。seed42，float32/CUDA，输入/核/偏置同设备。无下载、数据加载、分类训练或新checkpoint要求；本章只验收前向核心计算及Shape，反向实验为可选。
+**D06 实现框架：`lessons/d06/17_conv_pool.py`**。seed42，float32/CUDA，输入/核/偏置同设备。无下载、数据加载、分类训练或新checkpoint要求；本章只验收前向核心计算及Shape，反向实验为可选。
 
 | 顺序与目的 | 输入/输出和实现框架 | API、参数与副作用 | 核心自查 |
 |---|---|---|---|
@@ -289,7 +304,7 @@ DeepLearningLab/
 
 **D07 本轮组织（2026-10-22）**：把已学Conv/BN/分类/验证流程组成小型残差CNN。先讲CNN从局部特征到类别logits的数据流，再定义残差主分支R(x)、shortcut S(x)与输出ReLU(R(x)+S(x))；identity捷径适用于相同通道/stride1，通道或分辨率变化时用1×1卷积+BN投影。相加前两路Shape必须完全一致，不能依赖广播；禁止在捷径detach输入。说明加法节点的identity梯度项，最终梯度仍受后续激活等影响，不宣称梯度永不消失。BN2d对NCHW的每通道沿N/H/W统计；AdaptiveAvgPool2d((1,1))对每通道空间求均值，flatten(start_dim=1)保留batch，再接Linear输出类别分数。
 
-**D07 实现框架：`lessons/18_cnn_residual.py`**。只用本地合成数据，不下载/安装torchvision，不使用现成ResNet替代手写模块。数据准备seed42，模型创建前seed123，float32输入/long标签、实际运算统一CUDA。两种shortcut均需在同一分类器中体现；不要求普通CNN消融对照、速度优化或固定分类精度。
+**D07 实现框架：`lessons/d07/18_cnn_residual.py`**。只用本地合成数据，不下载/安装torchvision，不使用现成ResNet替代手写模块。数据准备seed42，模型创建前seed123，float32输入/long标签、实际运算统一CUDA。两种shortcut均需在同一分类器中体现；不要求普通CNN消融对照、速度优化或固定分类精度。
 
 | 顺序与意义 | 输入/输出与实现要求 | 相关API及副作用 | 核心自查 |
 |---|---|---|---|
@@ -300,6 +315,20 @@ DeepLearningLab/
 | 5. 最佳状态和最终测试 | 按已评估轮次最低val CE保存best_epoch/best_val_loss及deepcopy(state_dict)，包含BN buffers；20epoch结束恢复最佳状态，再仅一次评估test | state_dict含参数和running统计，deepcopy独立快照；load_state_dict载入现有模型后eval/no_grad；不要求落盘/恢复优化器或训练调度 | 验证不更新BN，测试不参与调参；报告初始/最终train-val、最佳epoch/val和test结果，不能由同模板加噪数据推断真实图像泛化 |
 
 验收聚焦图像NCHW数据、两种shortcut及逐元素残差相加、全局池化分类头、正确梯度/训练与验证选择；无固定准确率/损失门槛、完整ResNet家族或额外数据集项目要求。学生根据自己的模块结构解释一处identity和一处projection为什么能相加即可，接受聊天回答，不强制预测注释；代码已清楚展示正确数据流时不重复设置问答关卡。
+
+**D08 本轮组织（2026-10-22）**：承接D07已实现的模型状态落盘，区分恢复预测与恢复同一训练过程。说明AdamW的step/一阶和二阶矩、BN参数之外的running buffers、已完成epoch/global_step、随机序列当前位置与DataLoader打乱状态、配置与指标历史。用同环境的“连续4轮”与“2轮保存退出、重新启动再训练2轮”对照，目标是正确接续训练，不设分类精度或逐位相等门槛；不是P-D整体验收。最佳验证模型和当前训练状态用途不同，本实验在epoch边界保存当前状态，不先恢复D07最佳模型。
+
+**D08 实现框架：`lessons/d08/`（入口 `train.py`）**。2026-10-23 学生已采用 config/data/model/engine/checkpoint/compare/train 多模块草稿；产物统一放在 `lessons/d08/outputs/`。原单文件建议已被此结构取代，模块拆分不增加验收要求。复用学生TinyResNet/ResidualBlock和D07数据逻辑，不重写新模型；旧脚本顶层会执行训练，不要求直接import旧脚本，可自行复用类定义。三次独立进程可用mode变量区分baseline/interrupt/resume，命令行参数和函数拆分为可选组织。共同设置模型seed123、loader专用CPU Generator seed456、batch16/shuffleTrue/num_workers0，AdamW(lr=.01,weight_decay=0)，无scheduler/AMP/多进程。cuDNN benchmark=False、deterministic=True以减少卷积非确定性；仅同设备/版本作数值接近对照，不承诺跨设备或版本完全一致。
+
+| 顺序与目的 | 输入/输出与操作 | API、参数/返回/副作用及位置 | 核心自查 |
+|---|---|---|---|
+| 1. 固定数据和实验起点 | baseline按D07噪声图像/固定划分生成一次，将CPU train图像[48,1,16,16]/long标签[48]、val图像[24,1,16,16]/标签[24]和train样本ID保存到d08_data.pt；interrupt/resume读取同一文件。模型初始化种子放在数据准备之后 | torch.save(obj,path)立即写盘返回None；torch.load(path,map_location='cpu',weights_only=True)返回原字典并把Tensor映射CPU。TensorDataset(X,y,ids)三者首轴相同，ids只记录不喂模型；batch图像/标签toCUDA，ID留CPU | 三路使用同一批实际样本及配对、模型结构/初值/配置相同；不要用D07训练后权重作为起点 |
+| 2. 一轮训练与日志 | 每轮3次真实step；记录每批ID列表、global_step，以及epoch结束eval/no_grad全量train/val CE和accuracy的Python数值。history每轮一行，字段epoch/global_step/train_loss/train_acc/val_loss/val_acc | torch.Generator(device='cpu')创建独立生成器，manual_seed(456)改变其起点并返回自身，DataLoader(generator=g)让shuffle和迭代器种子使用它；tolist记录CPU ID，item取指标数值；每轮开头model.train | baseline4轮12step；interrupt2轮6step；恢复只追加第3、4轮，到12step/history4行，评估不更新BN |
+| 3. 完整epoch边界快照 | 字段model_state、optimizer_state、completed_epochs、global_step、torch_rng_state、cuda_rng_state_all、loader_rng_state、history、batch_order、config。config仅基本数值/字符串，记录模型/种子/批量/lr/wd/目标轮数等；随机状态在本轮评估和记录后、下一迭代器之前采集 | model.state_dict含参数/BN buffers但不含train/eval标志与梯度；optimizer.state_dict含state/param_groups；torch.get_rng_state→CPU ByteTensor，torch.cuda.get_rng_state_all→CPU ByteTensor列表，g.get_state→CPU ByteTensor。取状态不推进随机序列；立即save可不deepcopy，留内存继续训练后再保存则需独立快照 | interrupt保存当前第2轮状态，不恢复best；同一时点的模型/优化器/RNG/计数配套，未引入Python random/NumPy无需额外RNG |
+| 4. 新进程恢复 | 先读数据/配置/检查点，创建模型并整体toCUDA，创建绑定该模型的AdamW与loader；载入模型和优化器、恢复计数/历史；最后恢复CPU/CUDA/loader RNG，再进入下一轮 | model.load_state_dict(state,strict=True)默认原地复制返回缺失/多余key信息；optimizer.load_state_dict(state)原地恢复返回None，含参数组配置，当前默认AdamW会将moment匹配参数设备，step可能保留CPU；torch.set_rng_state、torch.cuda.set_rng_state_all、g.set_state恢复状态并返回None。载入CPU映射保证ByteTensor状态不被误搬CUDA | 不把load_state_dict返回值赋给model/optimizer；不在恢复RNG后重新seed或提前迭代loader；completed_epochs=2表示第3轮开始，下一更新前清grad并train |
+| 5. 三路对照和可读日志 | baseline4轮输出d08_baseline.pt/json；interrupt2轮输出d08_resume.pt；新进程resume输出d08_resumed.pt/json并与baseline比较。json记录4行history，resume保留前2行再追加 | json.dump(history,fp,indent=2,ensure_ascii=False)将基本类型写入打开的UTF-8文本文件，返回None，不直接序列化Tensor。torch.allclose(a,b,rtol=1e-4,atol=1e-5)返回bool，比较前同设备；整数buffers用equal，浮点参数/BN buffers按容差，并报告最大参数绝对差 | 两路batch_order全部12批应一致，完成轮数4/step12；全部模型状态数值接近，优化器恢复含step/moments，后两轮验证指标接近。比较失败先定位状态或数据，不用提高精度门槛代替诊断 |
+
+主流程伪代码为“准备固定数据 → 创建同起点模型/优化器/独立loader生成器 → 若resume则恢复全部状态且最后恢复RNG → 按剩余轮数训练/评估/追加记录 → 保存当前完整状态与日志 → resume与baseline对照”。第一步只需复用已有类，完成固定数据文件与一轮训练记录，再扩展快照/恢复；不要求先实现完整工程框架。不要求中途batch精确恢复、分布式、额外消融、绘图、安装日志库或重复测试集评估。实际学生进度只记PROGRESS.md。
 
 **验收项目 P-D**：完整图像分类工程（小数据集，禁止以 SOTA 为目标）。必须至少包含 `model.py`、`train.py`、`evaluate.py`、配置、训练日志、checkpoint、README、至少 3 个有意义的测试。学生自己实现核心类/训练循环。
 
@@ -574,14 +603,14 @@ Encoder-only / Encoder-Decoder；Cross-Attention；RoPE 细节；RMSNorm / SwiGL
 
 ### 尚未获得证据
 
-- `lessons/01_tensor.py` 是否存在/已运行。
+- `lessons/c01/01_tensor.py` 是否存在/已运行。
 - `dllab` 的 `torch.cuda.is_available()` 是否返回 True。
 - 学生是否真正理解 `mean(dim=0)` vs `mean(dim=1)`、`x.to('cuda')` 是否原地、二维索引。
 - Python 高级语法、Autograd、训练循环是否可独立编写。
 
 ### **第一项待办：C01 / Lesson 01（不要越级）**
 
-学生在 `~/projects/DeepLearningLab/lessons/01_tensor.py` **自己手写**：
+学生在 `~/projects/DeepLearningLab/lessons/c01/01_tensor.py` **自己手写**：
 
 1. 创建值为 `[[1.,2.,3.],[4.,5.,6.]]` 的 2×3 浮点 Tensor。
 2. 打印张量及 `.shape`、`.dtype`、`.device`。

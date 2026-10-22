@@ -1,5 +1,9 @@
 import torch
 import torch.nn as nn
+from pathlib import Path
+
+OUTPUT_DIR = Path(__file__).resolve().parent / "outputs"
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 seed = torch.manual_seed(42)
 cpu = "cpu"
@@ -56,10 +60,10 @@ for epoch in range(100):
         optimizer.step()
         optimizer.zero_grad()
 
-torch.save(model.state_dict(), "linear_c10.pt")
+torch.save(model.state_dict(), OUTPUT_DIR / "linear_c10.pt")
 
 with torch.no_grad():
-    state_dict1 = torch.load("linear_c10.pt", map_location = cpu, weights_only = True)
+    state_dict1 = torch.load(OUTPUT_DIR / "linear_c10.pt", map_location = cpu, weights_only = True)
     model.load_state_dict(state_dict1, strict = True)
 
     y_hat1 = model(X)
@@ -68,7 +72,7 @@ model_copy = Linear_model()
 model_no_trained = Linear_model()
 
 with torch.inference_mode():
-    state_dict2 = torch.load("linear_c10.pt", map_location = cpu, weights_only = True)
+    state_dict2 = torch.load(OUTPUT_DIR / "linear_c10.pt", map_location = cpu, weights_only = True)
     model_copy.load_state_dict(state_dict2, strict = True)
 
     y_hat2 = model_copy(X)

@@ -27,7 +27,7 @@
 
 - 项目根目录：`C:\Github\projects\DeepLearningLab`。
 - 已实测解释器：`C:\Users\wwx\miniconda3\envs\dllab\python.exe`；Python `3.11.17`；PyTorch `2.10.0+cpu`；`torch.cuda.is_available()` 为 False。
-- 当前课程使用 CPU；Session 053 静态查看确认本地 `lessons/09_dataset_loader.py` 的模型、batch 和最终评估已使用 cpu 变量，cuda:0 仅为未使用的 gpu 变量；本轮未重跑训练。此前 Linux CUDA 验收结论保留。
+- 当前课程使用 CPU；Session 053 静态查看确认本地 `lessons/c09/09_dataset_loader.py` 的模型、batch 和最终评估已使用 cpu 变量，cuda:0 仅为未使用的 gpu 变量；本轮未重跑训练。此前 Linux CUDA 验收结论保留。
 
 ### Linux 设备历史（2026-10-13 Session 044 重新验证）
 
@@ -51,12 +51,14 @@
 
 | 字段 | 当前内容 |
 |---|---|
-| 当前主要课程 | D07 — CNN图像分类器、残差块与跳跃连接 |
-| 实际作业 | D07 已验收文件为 `lessons/18_cnn_residual.py`；此前作业保留 |
-| 作业状态 | D07 `PASSED`（两种残差捷径、数据划分、60次更新、BN评估状态与最佳完整状态恢复/单次测试均验证）；D08未开始；P-C保持 `PASSED` |
+| 当前主要课程 | D08 — 可重复性、完整checkpoint、指标日志与恢复训练 |
+| 实际作业 | 学生已创建 `lessons/d08/` 七模块草稿，入口 `train.py`、产物 `outputs/`；已验收代码迁移至对应课程目录，完整对照见 `lessons/INDEX.md` |
+| 作业状态 | D08 `IN_PROGRESS`（已观察到学生多模块草稿，尚未进行本课代码验收或训练验证）；D07/P-C保持 `PASSED` |
 | 通过验收的课次 | `C01`、`C02`、`C03`、`C04`、`C05`、`C06`、`C07`、`C08`、`C09`、`C10`、`C11`、`D01`、`D02`、`D03`、`D04`、`D05`、`D06`、`D07`（含 C11 CUDA 核心补充；不等同于全部内容无需提示的独立熟练或所有工具均已实践） |
-| 当前里程碑 | P-C 已通过；D阶段D07已通过；长期P-E是独立mini-GPT；P-D整体工程尚未验收 |
-| 下一个最小动作 | 用户请求后开展D08可重复性、checkpoint、日志/指标及训练恢复；D07无必须补交任务。best_epoch为零基计数，17对应完成第18轮；初值追加到历史为可选展示整理 |
+| 当前里程碑 | P-C 已通过；D01–D07已通过、D08草稿编写中；长期P-E是独立mini-GPT；P-D整体工程尚未验收 |
+| 下一个最小动作 | 在 `lessons/d08/` 现有模块继续实现固定数据与一轮训练记录，再接完整保存/恢复及4轮对照2+2轮；本次只整理目录，不新增作业门槛 |
+
+**目录迁移说明（2026-10-23）**：当前路径已更新为 `lessons/<课程ID>/`，运行产物进入各课 `outputs/`；历史Session中的旧路径保留，见 `lessons/INDEX.md` 对照。本次仅进行文件/路径与静态检查，不改变已有验收结论。
 
 ## 3. 已讲解但尚未通过的知识
 
@@ -77,13 +79,17 @@
 
 ### 尚未完整验收的内容
 
+- D08在Session088已观察到 `lessons/d08/` 多模块草稿，状态转为IN_PROGRESS；本轮仅整理目录和静态检查，没有审阅算法正确性或运行训练。Session087的EXPLAINED及当时无学生文件为历史事实，不代表当前目录仍为空。
+
+- D08在Session087展开：讲解预测恢复与训练恢复的区别、AdamW内部状态、BN buffers、seed与RNG当前位置、专用loader Generator、epoch边界快照与最后恢复RNG的顺序；布置同设备连续4轮/独立进程2+2轮对照及日志。状态EXPLAINED，未创建学生文件、运行新实验或据讲解认定掌握；D07已有仅模型落盘不等同于D08完整训练恢复验收。
+
 - D07在Session086通过：学生在Session085原理/API/框架讲解后实现完整小残差CNN，identity与投影两路Shape一致且真实相加，数据/梯度/BN评估/最佳完整状态恢复与最终一次测试正确。尚无学生独立口头推导残差梯度的证据，不据此声称完整ResNet家族、真实视觉泛化或无提示迁移均熟练。初始指标只打印、20轮指标存列表；当前最佳验证结果不受影响，追加初始记录留可选整理。
 
 - D06 在Session084通过：学生在Session083原理/API/框架提示后完成手写单通道卷积、四组stride/padding参考对照、多通道与原定padding0池化。额外手写max/avg池化在当前正输入上亦匹配，但maxpool2d_single对padding>0使用0而非负无穷，已复现负输入错误；此扩展非原章必做，不阻塞主任务通过，也不能记录为通用池化已正确实现。跨设备/dtype通用性与反向未验收，未据通过推断全程无提示熟练。
 
 - D05 在 Session 082 通过：学生在Session081原理/API/框架讲解后完成统计轴、BN状态、Dropout和单步训练/梯度模式实验。额外momentum=1对照亦正确，train/eval差异由导师依据两种方差估计解释；BN前Linear bias不变的消均值原因和反向前grad=None由导师提示，尚无学生独立解释证据。不据通过推断归一化理论、所有布局或无提示迁移均熟练。
 
-- D04 在 Session 080 通过：学生在 Session 078/079 原理/API/实现框架提示后完成 lessons/15_generalization.py，数据隔离、训练与验证评估、独立最佳快照和最终一次测试正确。当前两组初始 evaluate 后首轮更新仍处 eval，纯 Linear/ReLU 不影响本轮结果；显式恢复 train 留为非阻塞习惯改进。过拟合趋势已由导师依据真实指标解释，尚无学生独立口头分析证据，不等同于无提示熟练或普遍模型选择结论。
+- D04 在 Session 080 通过：学生在 Session 078/079 原理/API/实现框架提示后完成 lessons/d04/15_generalization.py，数据隔离、训练与验证评估、独立最佳快照和最终一次测试正确。当前两组初始 evaluate 后首轮更新仍处 eval，纯 Linear/ReLU 不影响本轮结果；显式恢复 train 留为非阻塞习惯改进。过拟合趋势已由导师依据真实指标解释，尚无学生独立口头分析证据，不等同于无提示熟练或普遍模型选择结论。
 
 - D03 已在 Session 077 通过：学生在讲解后完成三簇数据、两层 Linear、原始 logits 的交叉熵训练与正确分类评估，首次提交即通过本轮核心验收；不推断未验证的无提示迁移能力。仅评估已见训练数据，不能由训练准确率 100% 推断泛化；概率行和由导师另行核验，学生日志尚未实际打印行和，留为非阻塞展示建议。B07 仅按需联系，未整模块验收。
 
@@ -133,9 +139,9 @@
 
 - C11 CUDA 补充：Session 066 完整脚本退出码 0；A/B 为 CUDA float32 [512,512]、不求导，矩阵输出有限（导师另行检查）；del C 后不再保留旧 C 名称，globals 仅映射 A/B，Timer 与 Measurement 正确，0.2 秒短测得到本轮 median≈13.475 µs/次。显存 allocated 减少 1048576 字节，删除与清缓存合并观察下 reserved 也减少；不宣称已单独测定每个操作的作用。
 
-- C11（CPU 范围）：`lessons/11_debug_check.py` 已完整运行成功，有限性 True、gradcheck True、X 元素存储 40 字节；此前导师验证 shape 断言有效。globals 正确映射函数对象及参数，blocked_autorange 返回 Measurement 并读取 median；Session 062 单次中位数约 38.07 微秒，报告测量波动较大，不记录为稳定性能结论。保留提示依赖与 CUDA 未实践限制。
+- C11（CPU 范围）：`lessons/c11/11_debug_check.py` 已完整运行成功，有限性 True、gradcheck True、X 元素存储 40 字节；此前导师验证 shape 断言有效。globals 正确映射函数对象及参数，blocked_autorange 返回 Measurement 并读取 median；Session 062 单次中位数约 38.07 微秒，报告测量波动较大，不记录为稳定性能结论。保留提示依赖与 CUDA 未实践限制。
 
-- C10：`lessons/10_state_dict.py` 在 Windows dllab / Torch 2.10.0+cpu 完整执行成功，无警告。W/b shape [1]，最终预测 [5,1]；W=2.0、b=0.9999999403953552，MSE=7.10542746348012e-16。独立 model_copy 由磁盘 state_dict 恢复，参数逐项相等、预测 allclose True，未训练模型对照 False。两次运行初始 W 输出约 0.0337 及全部检查结果一致。测试采用临时工作目录保存/读取文件，学生已有 checkpoint 未被覆盖；保留提示依赖。
+- C10：`lessons/c10/10_state_dict.py` 在 Windows dllab / Torch 2.10.0+cpu 完整执行成功，无警告。W/b shape [1]，最终预测 [5,1]；W=2.0、b=0.9999999403953552，MSE=7.10542746348012e-16。独立 model_copy 由磁盘 state_dict 恢复，参数逐项相等、预测 allclose True，未训练模型对照 False。两次运行初始 W 输出约 0.0337 及全部检查结果一致。测试采用临时工作目录保存/读取文件，学生已有 checkpoint 未被覆盖；保留提示依赖。
 
 - C09：根目录 09_dataset_loader.py 已实测完整运行成功，Dataset 长度 5、索引 2 配对 [0]/[1]，loader 长度 3、batch Shape [2,1]/[2,1]/[1,1]；CPU 数据按批迁移 CUDA，100 个 epoch 后 W=2、b≈0.99999988。最终 no_grad 全数据评估 MSE≈5.68434e-15、最大绝对误差≈1.19209e-7。多轮提示依赖保留，非全面独立熟练证据。
 
@@ -149,7 +155,7 @@
 
 ### 待确认
 
-- C08 非阻塞改进更新（Session 046 静态检查）：当前文件已位于 lessons/08_train_linear.py，学生已删除未使用的 Loss 子类，并将最终前向放入 no_grad 范围；未重跑，不新增训练结果证据。尚未单独打印最终重新计算的损失，既有导师评估已确认正确拟合，不阻塞新课。
+- C08 非阻塞改进更新（Session 046 静态检查）：当前文件已位于 lessons/c08/08_train_linear.py，学生已删除未使用的 Loss 子类，并将最终前向放入 no_grad 范围；未重跑，不新增训练结果证据。尚未单独打印最终重新计算的损失，既有导师评估已确认正确拟合，不阻塞新课。
 
 - C04 可选改进：截至 Session 026 最新实测，无 GPU 时 reshape 被条件跳过，二维切片报错；未证明已经修复，不宣称跨设备代码兼容。缺少跳过提示及 Y_0.device 输出同列为改进项，不阻塞 C05 学习。
 
@@ -996,6 +1002,25 @@
 - **测试与完整状态证据**：test调用仅一次，发生在60次更新之后，进入时model.state_dict全部项与独立best_state相同；test CE=.0029932595789432526、correct24、acc1.0。内存快照与参数不共享data_ptr，临时目录中的检查点与快照一致。学生已经扩展落盘保存，但未据此把D08训练恢复提前标记通过。
 - **验收结论与非阻塞建议**：D07 PASSED，无必须补交任务，不追加口头/注释/消融关卡。epoch打印可用epoch+1改善可读性，17表示已完成18轮；max_val_loss实际保存最低值，可日后改名best_val_loss，初始指标追加历史为可选整理。forward中新建无参数无模式差异的ReLU对象不影响正确性，不强制重构。当前结果只支持合成模板噪声分布，未验证真实图像泛化、普遍残差优越性或学生独立理论推导。
 - **下一步 / Git**：用户请求后开展D08可重复性、checkpoint、日志/指标与训练恢复；P-D整体工程仍未验收。仅更新进度与证据，未修改学生源码、依赖或执行Git同步，不宣称已检查远端。
+
+### Session 087 — 2026-10-22（D08 开课：完整训练状态与跨进程续训）
+
+- **恢复与授权**：学生请求下一课；重读AGENTS.md、教学skill、当前状态和实际Session086、D08规划，查看D07模型/训练/保存逻辑及文件清单。D07保持PASSED且无必须补交项；尚无19_checkpoint_resume.py。编辑前git status为干净的本地main...origin/main，未进行远端检查，不宣称已同步。
+- **意义与原理**：基于学生已保存model_state+epoch，解释这不足以接续AdamW原有轨迹；需同步保存优化器step/矩、BN buffers、计数、RNG、loader打乱位置与历史/配置。seed从头开始，RNG state恢复当前位置；当前训练快照区别于最低验证损失模型，不混用不同时点的权重与优化器。
+- **任务与框架**：建议lessons/19_checkpoint_resume.py复用学生现有类与D07合成数据逻辑，baseline生成并保存CPU固定train/val和样本ID，三独立进程进行4轮baseline、2轮interrupt、从第3轮resume到4。batch16，每轮3step，AdamW lr.01/wd0，模型seed123、CPU loader Generator seed456、workers0。分块解释固定数据→训练/指标记录→完整快照→恢复→三路对照，详见LEARNING_PLAN.md D08框架；函数化/命令行可选，不代写核心代码。
+- **关键API与顺序**：torch.save/load(map_location=cpu,weights_only=True)，模型/优化器state_dict与原地load_state_dict，CPU/CUDA/Generator get/set RNG，DataLoader(generator=...)与JSON Python数值日志。epoch边界完成评估/记录后保存；新进程先创建CUDA模型及绑定优化器/loader并载入状态，最后恢复三类RNG，再创建下一epoch迭代器。模型模式/grad不由state_dict恢复，训练前train和正常清grad；默认AdamW的step在CPU可正常，不强制全state迁移。
+- **验收范围**：固定数据与同起点、完整状态跨进程恢复、batch_order12批精确对应、completed_epochs4/global_step12/history4行无重置、参数和BN buffers以及后两轮指标数值接近。无精度门槛或跨设备逐位保证，不追加多进程、mid-epoch、scheduler/AMP、下载/安装、完整P-D工程或反复test任务。
+- **环境与来源**：dllab实测Torch2.10.0+cu128、CUDA12.8可用、RTX PRO6000 Blackwell；核对本地torch.load/DataLoader签名和Optimizer默认状态设备处理，浏览官方checkpoint、2.10 reproducibility/Generator/load文档。只验证环境/API，未运行学生D08训练或修改依赖。
+- **状态与下一步 / Git**：D08 EXPLAINED，先完成固定数据与一轮记录，再接剩余框架并集中审阅；尚无学生实现或掌握证据。自动维护LEARNING_PLAN.md/PROGRESS.md，保留历史，不修改学生.py、AGENTS长期规则或执行Git同步。
+
+### Session 088 — 2026-10-23（按课程ID整理代码和outputs，保留D08多模块草稿）
+
+- **用户授权与恢复**：用户明确请求从D08起采用每课代码目录加outputs的结构，并按历史代码/课程对应整理已有作业。重读AGENTS、教学skill、进度/实际Session087和C/D对应规划，检查本地文件、Git改动与文件读写。保留已有LEARNING_PLAN.md/PROGRESS.md未提交修改；D08已有config/data/model/engine/checkpoint/compare/train七个模块，其中部分为空草稿，未把文件存在当成课程通过。
+- **迁移结果**：原01–11脚本分别放入lessons/c01–c11，11_debug_check.py与11_cuda_check.py共同归C11；12–18分别归lessons/d01–d07。共迁移19份历史脚本，保留原文件名。lessons/model_1.pt、model_2.pt归d04/outputs，best_model.pt归d07/outputs；19个已存在课程目录（C01–C11、D01–D08）各保留outputs/.gitkeep。完整旧/新路径表见lessons/INDEX.md。
+- **路径适配与保护**：只为C10/D04/D07添加以__file__定位本课outputs的Path配置，并替换save/load路径，未改变模型/数据/训练算法或补全作业。D08现有config.py已采用正确目录方式，未修改其任何.py；整理期间观察到学生data.py/engine.py继续变化，保留实时修改。README.md、nanoGPT、依赖、忽略规则和既有产物内容均保持。
+- **实际验证**：迁移前记录29个文件的路径/哈希，逐一确认迁移后仍存在；16份未改动历史脚本和3个checkpoint字节哈希一致。对另外3份脚本，去除新增路径配置和产物路径表达式后AST与Git原文件相同，确认只改I/O位置。26个当前Python文件均静态解析通过；在临时工作目录仅求值路径配置，验证3课outputs不随cwd改变；19个.gitkeep及索引链接全部存在。未运行训练、覆盖权重或据语法检查判定算法正确。
+- **文档与状态**：AGENTS.md/LEARNING_PLAN.md确立lessons/<小写课程ID>/outputs规则；规划及进度当前部分使用新路径，历史Session保留当时路径，新增索引追溯。D08由EXPLAINED转为IN_PROGRESS仅依据实际观察到学生草稿，未验收；D07及此前通过结论不变。
+- **下一步 / Git**：学生继续lessons/d08/模块中的数据与一轮训练记录，再接完整checkpoint恢复/对照；本轮不推进新课程或追加门槛。未执行commit/push/pull，未检查远端。现有*.pt/*.pth忽略仍有效，迁移模型留在本机，不能声称会随普通Git提交同步。
 
 ## 7. 后续 Session 模板（复制本段追加，不要覆盖历史）
 
