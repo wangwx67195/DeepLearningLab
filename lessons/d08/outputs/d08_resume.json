@@ -1,0 +1,20 @@
+[
+  {
+    "epochs": 0,
+    "completed_epochs": 1,
+    "global_step": 3,
+    "train_loss": 1.017717719078064,
+    "train_acc": 0.6666666865348816,
+    "val_loss": 1.021159052848816,
+    "val_acc": 0.6666666865348816
+  },
+  {
+    "epochs": 1,
+    "completed_epochs": 2,
+    "global_step": 6,
+    "train_loss": 0.9149276614189148,
+    "train_acc": 0.7916666865348816,
+    "val_loss": 0.9245532155036926,
+    "val_acc": 0.75
+  }
+]

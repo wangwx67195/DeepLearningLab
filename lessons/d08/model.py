@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-
+# ResidualBlock Class
 class ResidualBlock(nn.Module):
     def __init__(self, in_channels, out_channels, stride):
         super().__init__()
@@ -32,6 +32,7 @@ class ResidualBlock(nn.Module):
 
         return pred
 
+# Main Model Class: TinyResNet
 class TinyResNet(nn.Module):
     def __init__(self):
         super().__init__()
