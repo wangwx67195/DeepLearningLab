@@ -2,3 +2,5 @@
 *.pt
 *.pth
 
+*.pyc
+*.pyo
