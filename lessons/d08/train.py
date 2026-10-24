@@ -30,7 +30,12 @@ from checkpoint import save_checkpoint, load_checkpoint
 device = "cuda"
 
 def main():
-    if MODE == "baseline" or MODE == "interrupt":
+    # Create dataset if MODE is baseline or interrupt
+    if MODE == "baseline":
+        torch.manual_seed(DATA_SEED)
+        data = generate_data() # Data is generated
+        torch.save(data, DATA_PATH) # Save the generated data
+    elif MODE == "interrupt":
         torch.manual_seed(DATA_SEED)
         data = generate_data() # Data is generated
         torch.save(data, DATA_PATH) # Save the generated data

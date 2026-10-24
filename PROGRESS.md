@@ -52,11 +52,11 @@
 | 字段 | 当前内容 |
 |---|---|
 | 当前主要课程 | D08 — 可重复性、完整checkpoint、指标日志与恢复训练 |
-| 实际作业 | 学生已创建 `lessons/d08/` 七模块草稿，入口 `train.py`、产物 `outputs/`；已验收代码迁移至对应课程目录，完整对照见 `lessons/INDEX.md` |
-| 作业状态 | D08 `IN_PROGRESS`（已观察到学生多模块草稿，尚未进行本课代码验收或训练验证）；D07/P-C保持 `PASSED` |
+| 实际作业 | `lessons/d08/` 八模块：config/data/model/loss/engine/checkpoint/compare/train；入口 `train.py`、产物 `outputs/`；目录对照见 `lessons/INDEX.md` |
+| 作业状态 | D08 `IN_PROGRESS`（Session089已验证完整保存/恢复及批次/日志接续正确；默认CUDA计算下比较不稳定，待学生补入cuDNN确定性设置再做最终复核）；D07/P-C保持 `PASSED` |
 | 通过验收的课次 | `C01`、`C02`、`C03`、`C04`、`C05`、`C06`、`C07`、`C08`、`C09`、`C10`、`C11`、`D01`、`D02`、`D03`、`D04`、`D05`、`D06`、`D07`（含 C11 CUDA 核心补充；不等同于全部内容无需提示的独立熟练或所有工具均已实践） |
-| 当前里程碑 | P-C 已通过；D01–D07已通过、D08草稿编写中；长期P-E是独立mini-GPT；P-D整体工程尚未验收 |
-| 下一个最小动作 | 在 `lessons/d08/` 现有模块继续实现固定数据与一轮训练记录，再接完整保存/恢复及4轮对照2+2轮；本次只整理目录，不新增作业门槛 |
+| 当前里程碑 | P-C 已通过；D01–D07已通过，D08保存恢复核心已核验、可重复性设置待补；长期P-E是独立mini-GPT；P-D整体工程尚未验收 |
+| 下一个最小动作 | 在 `lessons/d08/train.py` 的启动初始化中、创建模型及开始CUDA计算前，将cuDNN benchmark设为False、deterministic设为True，三种模式统一应用；重新运行baseline/interrupt/resume及compare后完成D08最终复核，不重写恢复逻辑 |
 
 **目录迁移说明（2026-10-23）**：当前路径已更新为 `lessons/<课程ID>/`，运行产物进入各课 `outputs/`；历史Session中的旧路径保留，见 `lessons/INDEX.md` 对照。本次仅进行文件/路径与静态检查，不改变已有验收结论。
 
@@ -78,6 +78,8 @@
 - 2026-10-17 学生补充：任务布置应提供明确实现框架，按依赖顺序逐块列出目的、输入输出（Shape/dtype/device）、操作步骤、API 参数/返回值/副作用和使用位置、核心自查点；配合主流程伪代码及必要接口/记录字段，指出当前第一步。函数化为可选组织方式，不代写完整答案，不降低难度或追加验收门槛。已同步到 AGENTS.md 与 LEARNING_PLAN.md。
 
 ### 尚未完整验收的内容
+
+- D08在Session089实际验收：原代码三独立训练进程全部成功，baseline12次更新、interrupt6次、resume新增6次且累计12次；数据一致、批次顺序/历史前缀/三类RNG均接续正确，模型/优化器完整状态恢复实现正确。但默认cuDNN deterministic=False时，一次新运行模型最大差约6.06e-5、模型及优化器比较False，暂不标记整章PASSED。导师仅在隔离测试进程开启benchmark=False/deterministic=True后，同样三路实验与学生compare全部通过、模型完整state_dict逐项相等，最大差0；这是定位证据，不冒充学生已经补好配置。下一步只补这一初始化设置再最终复核；不追加精度/问答/工程关卡。
 
 - D08在Session088已观察到 `lessons/d08/` 多模块草稿，状态转为IN_PROGRESS；本轮仅整理目录和静态检查，没有审阅算法正确性或运行训练。Session087的EXPLAINED及当时无学生文件为历史事实，不代表当前目录仍为空。
 
@@ -120,6 +122,8 @@
 ## 5. 掌握证据与待补修点
 
 ### 已验收
+
+- D08阶段证据（Session089，整章尚未通过）：完整checkpoint字段、CPU映射加载、模型/AdamW/CPU-CUDA-loader RNG恢复顺序、计数/历史接续和JSON记录已实际核验。原流程独立进程4轮/2轮/续2轮均运行，所有真实更新梯度存在有限，评估不改变BN buffers，最终4轮/12step/history4条/batch12条，恢复保留interrupt前缀；已有产物与新运行产物均检查。剩余为学生代码中补齐CUDA卷积确定性配置，不能将导师配置后的诊断通过记录成原代码整章验收通过。
 
 - D07：Session086 CUDA完整执行20epoch/60次AdamW更新通过，模型5003个参数元素/20个参数张量；初始train/val CE=1.0997440814971924/1.0990586280822754，准确率均约1/3；第20轮train CE=.0027334222104400396、val CE=.0028913766145706177，准确率均1.0。最佳epoch索引17（第18轮），val CE=.0026979537215083838，恢复后复算一致。只在60次更新后、载入含BN buffers的最佳状态时调用test一次，CE=.0029932595789432526、24/24正确。train/val/test为48/24/24，类别计数16/8/8各三类、索引互斥配对；所有更新梯度存在有限，首步20个参数张量均改变。两种残差块共观察206次，Shape/相加后ReLU均核验，评估始终不改BN buffers。仅为当前合成图像分布实验，P-D工程未整体验收。
 
@@ -1021,6 +1025,17 @@
 - **实际验证**：迁移前记录29个文件的路径/哈希，逐一确认迁移后仍存在；16份未改动历史脚本和3个checkpoint字节哈希一致。对另外3份脚本，去除新增路径配置和产物路径表达式后AST与Git原文件相同，确认只改I/O位置。26个当前Python文件均静态解析通过；在临时工作目录仅求值路径配置，验证3课outputs不随cwd改变；19个.gitkeep及索引链接全部存在。未运行训练、覆盖权重或据语法检查判定算法正确。
 - **文档与状态**：AGENTS.md/LEARNING_PLAN.md确立lessons/<小写课程ID>/outputs规则；规划及进度当前部分使用新路径，历史Session保留当时路径，新增索引追溯。D08由EXPLAINED转为IN_PROGRESS仅依据实际观察到学生草稿，未验收；D07及此前通过结论不变。
 - **下一步 / Git**：学生继续lessons/d08/模块中的数据与一轮训练记录，再接完整checkpoint恢复/对照；本轮不推进新课程或追加门槛。未执行commit/push/pull，未检查远端。现有*.pt/*.pth忽略仍有效，迁移模型留在本机，不能声称会随普通Git提交同步。
+
+### Session 089 — 2026-10-24（D08 首次完整验收：恢复正确，定位cuDNN可重复性设置缺失）
+
+- **恢复与范围**：学生请求检查D08并验收；重读AGENTS、mentor skill、当前状态和实际Session088、D08规划，逐模块审阅现有八文件及已有检查点/日志。保留学生config/compare/engine/model/train未提交修改；未改写任何学生源码或增加原任务范围。
+- **静态正确部分**：模型复用残差CNN；专用CPU Generator控制shuffle，batch ID不输入模型；正常清grad/反向/AdamW更新，每轮train，eval/no_grad重算完整train/val并item记录。checkpoint保存模型含BN buffers、优化器、计数、三类RNG、历史、批次与配置；CPU映射载入，先载模型/优化器、后恢复RNG，剩余epoch区间正确；config依__file__管理outputs。
+- **已有产物只读检查**：baseline/interrupt/resumed分别为4/2/4轮、12/6/12步、4/2/4条history、12/6/12批；已有baseline与resumed模型最大绝对差1.1920928955078125e-6，在学生rtol1e-5/atol1e-6下allclose通过，三类RNG与批次一致。此结果不能代替新进程运行稳定性验证。
+- **原代码真实运行**：在临时输出目录以三个独立dllab进程执行学生train.main，用测试启动器仅切换MODE及路径，未改训练/模型/RNG算法；随后独立运行学生compare。baseline12次step、interrupt6次、resume新增6次；分别8/4/4次评估，全部更新梯度存在有限、全部评估前后BN buffers不变。interrupt重新生成的数据与baseline逐张量完全相同，resume历史前2条/批次前6条与中断检查点相同；三个JSON与各自checkpoint历史相同。源文件及原outputs哈希前后不变。
+- **真实失败证据**：新运行中compare输出batch_order=True、param_groups=True，但model_parameters=False、optimizer_parameter=False，history部分False。模型完整状态最大差6.0558319091796875e-5，优化器状态最大差4.729628562927246e-5；即使按原规划rtol1e-4/atol1e-5，部分模型/优化器张量仍未通过。三类RNG最终均相同，步数及批次对应无误；差异在独立从头训练的第2轮已出现，不归咎于漏恢复状态。
+- **定位性复测**：检查代码无cuDNN确定性初始化，当前benchmark=False、deterministic=False。只在新隔离测试进程、训练前设benchmark=False/deterministic=True，重复原有4/2/续2轮流程（额外24次小规模更新，因前次失败而进行定位），所有进程退出0；学生compare批次/模型/优化器组/优化器状态与全部history项True，模型完整state_dict逐项equal、最大差0。此为导师进程配置后的诊断证据，未写回学生源码、不要求跨设备逐位一致。
+- **结论与最小修正提示**：保存恢复与记录核心实现通过检查，D08整体保持IN_PROGRESS，仅待学生在train.py启动、CUDA模型/训练开始前统一配置两项cuDNN属性再复核。不以放宽容差代替定位，也不要求改写checkpoint/训练循环或补充口头/注释关卡。interrupt重复生成并覆盖同文件本次数据确实相同，后续可改为读固定缓存；config缺batch_size/更多环境信息及compare_history返回布尔列表均为非阻塞整理建议。
+- **环境/来源/Git**：Python3.11.17、Torch2.10.0+cu128、CUDA12.8可用、RTX PRO6000 Blackwell；查阅官方2.10 reproducibility文档的cuDNN算法确定性说明。仅更新PROGRESS.md，未改依赖、覆盖已有产物、执行Git同步或推进下一课。
 
 ## 7. 后续 Session 模板（复制本段追加，不要覆盖历史）
 

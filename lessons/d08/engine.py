@@ -11,8 +11,8 @@ def evaluate(model, images, labels, loss_fn, device):
         pred_labels = pred_logits.argmax(dim = 1)
 
         pred_correct = (pred_labels == labels).float().sum()
-        pred_acc = (pred_labels == labels).float().mean()
-        pred_CE_loss = loss_fn(pred_logits, labels).float()
+        pred_acc = (pred_labels == labels).float().mean() # Bool must turn into float
+        pred_CE_loss = loss_fn(pred_logits, labels)
 
         loss_value = pred_CE_loss.item()
         acc_value = pred_acc.item()

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-MODE = "r"
+MODE = "baseline"
 
 # Part01: file path
 D08_DIR = Path(__file__).resolve().parent
@@ -16,8 +16,6 @@ LOADER_SEED = 456
 BATCH_SIZE = 16
 LEARNING_RATE = 0.01
 WEIGHT_DECAY = 0.0
-
-BATCH_SIZE = 16
 
 TOTAL_EPOCHS = 4
 INTERRUPT_EPOCHS = 2
@@ -35,14 +33,14 @@ INTERRUPT_JSON_PATH = OUTPUT_DIR / "d08_resume.json"
 RESUME_JSON_PATH = OUTPUT_DIR / "d08_resumed.json"
 
 # CKPT_PATH: Load the checkpoint file, only resume mode needs it
-RESUME_CHKPT_PATH = OUTPUT_DIR / "d08_resumed.pt"
+RESUME_CHKPT_PATH = OUTPUT_DIR / "d08_resume.pt"
 
 # Part03: Output file path
 if MODE == "baseline":
-    OUTPUT_PATH = BASELINE_PATH
+    OUTPUT_PATH = BASELINE_PATH # MODE baseline has no checkpoint file to read
     JSON_PATH = BASELINE_JSON_PATH
 elif MODE == "interrupt":
-    OUTPUT_PATH = INTERRUPT_PATH
+    OUTPUT_PATH = INTERRUPT_PATH # MODE interrupt has no checkpoint file to read
     JSON_PATH = INTERRUPT_JSON_PATH
 elif MODE == "resume":
     CKPT_PATH = RESUME_CHKPT_PATH
