@@ -40,23 +40,29 @@
 - 运行验证：`dllab` 的 Python 路径为 `/home/wwx/anaconda3/envs/dllab/bin/python`；Torch CUDA 为 `12.8`，CUDA 可用，GPU 为 NVIDIA RTX PRO 6000 Blackwell Workstation Edition；作业中的小张量转换成功。
 - 环境备注：当前 Agent shell 未激活环境，使用 `conda run -n dllab python`；Torch 导入提示缺少 NumPy，本次作业执行成功，未修改依赖。
 
-### 当前 Ubuntu 设备（2026-10-14 Session 063 验证）
+### Ubuntu 设备历史（2026-10-14 Session 063 验证）
 
 - 系统实测：Ubuntu 22.04.5 LTS；项目为 ~/projects/DeepLearningLab/。
 - 解释器：/home/wwx/anaconda3/envs/dllab/bin/python，Python 3.11.17；Torch 2.10.0+cu128、Torch CUDA 12.8，CUDA 可用。
 - GPU：NVIDIA RTX PRO 6000 Blackwell Workstation Edition，计算能力 12.0；当前 PyTorch 支持架构列表包含 sm_120。
 - 实际 CUDA 小运算成功：GPU 上 [1,2] 逐元素平方求和，结果为 5.0。本轮只验证环境，不将 Windows 作业验收描述为当前设备的再次执行；Torch 导入提示缺少 NumPy，未改变依赖。
 
+### 当前 Windows 设备（2026-10-26 Session 090 验证）
+
+- 项目根目录：`C:\Github\projects\DeepLearningLab`；解释器：`C:\Users\wwx\miniconda3\envs\dllab\python.exe`。
+- 本轮实测 Python `3.11.17`、Torch `2.10.0+cpu`、CUDA 可用性 False；读取的 cuDNN benchmark/deterministic 属性均为 False，这只是当前 CPU 进程的配置值，不是 CUDA 运算验证。
+- D08 当前入口仍指定 CUDA，保存/恢复函数也调用 CUDA RNG API；本轮仅阅读代码、核对环境与官方文档，未启动训练、覆盖 outputs 或将此前 Linux CUDA 结果描述为本机新结果。
+
 ## 2. 本阶段当前位置
 
 | 字段 | 当前内容 |
 |---|---|
-| 当前主要课程 | D08 — 可重复性、完整checkpoint、指标日志与恢复训练 |
-| 实际作业 | `lessons/d08/` 八模块：config/data/model/loss/engine/checkpoint/compare/train；入口 `train.py`、产物 `outputs/`；目录对照见 `lessons/INDEX.md` |
-| 作业状态 | D08 `IN_PROGRESS`（Session089已验证完整保存/恢复及批次/日志接续正确；默认CUDA计算下比较不稳定，待学生补入cuDNN确定性设置再做最终复核）；D07/P-C保持 `PASSED` |
+| 当前主要课程 | D09 — 梯度累积、梯度裁剪与AMP；先进行CPU子任务 |
+| 实际作业 | D09待学生手写 `lessons/d09/20_grad_accum_clip.py`；D08八模块保留在 `lessons/d08/`，待CUDA最终复核；产物均归对应课程outputs |
+| 作业状态 | D09 CPU子任务 `EXPLAINED`，未实现或运行；D08仍 `IN_PROGRESS`（恢复核心已核验、入口配置已补，待CUDA复核）；D07/P-C保持 `PASSED` |
 | 通过验收的课次 | `C01`、`C02`、`C03`、`C04`、`C05`、`C06`、`C07`、`C08`、`C09`、`C10`、`C11`、`D01`、`D02`、`D03`、`D04`、`D05`、`D06`、`D07`（含 C11 CUDA 核心补充；不等同于全部内容无需提示的独立熟练或所有工具均已实践） |
-| 当前里程碑 | P-C 已通过；D01–D07已通过，D08保存恢复核心已核验、可重复性设置待补；长期P-E是独立mini-GPT；P-D整体工程尚未验收 |
-| 下一个最小动作 | 在 `lessons/d08/train.py` 的启动初始化中、创建模型及开始CUDA计算前，将cuDNN benchmark设为False、deterministic设为True，三种模式统一应用；重新运行baseline/interrupt/resume及compare后完成D08最终复核，不重写恢复逻辑 |
+| 当前里程碑 | P-C 已通过；D01–D07已通过，D08保存恢复核心已核验、可重复性设置已补，CUDA最终复核待完成；长期P-E是独立mini-GPT；P-D整体工程尚未验收 |
+| 下一个最小动作 | 学生先准备D09 CPU四样本、三个独立同初值线性模型及参考组一步更新，再接两微批累积与全局范数裁剪。D08三路CUDA复核及D09 CUDA AMP/性能实践待设备，不自动标记通过 |
 
 **目录迁移说明（2026-10-23）**：当前路径已更新为 `lessons/<课程ID>/`，运行产物进入各课 `outputs/`；历史Session中的旧路径保留，见 `lessons/INDEX.md` 对照。本次仅进行文件/路径与静态检查，不改变已有验收结论。
 
@@ -78,6 +84,10 @@
 - 2026-10-17 学生补充：任务布置应提供明确实现框架，按依赖顺序逐块列出目的、输入输出（Shape/dtype/device）、操作步骤、API 参数/返回值/副作用和使用位置、核心自查点；配合主流程伪代码及必要接口/记录字段，指出当前第一步。函数化为可选组织方式，不代写完整答案，不降低难度或追加验收门槛。已同步到 AGENTS.md 与 LEARNING_PLAN.md。
 
 ### 尚未完整验收的内容
+
+- D09在Session092开始CPU子任务：已讲解累积窗口、mean loss缩放、统一梯度范数裁剪及AMP概念，框架见LEARNING_PLAN.md；尚无学生代码或运行证据。CUDA AMP/显存/速度对照未实践，不将CPU任务或讲解记为D09全章通过。D08保留最终CUDA复核，不要求等设备才学习独立内容。
+
+- D08在Session091静态审阅确认：学生将benchmark=False/deterministic=True放在train.py的__main__保护块、main()调用之前，直接运行脚本时三种模式均生效。它们不在main函数体内，导入模块后调用main会绕过保护块；将配置移入main开头是兼顾该调用方式的可选整理，直接脚本入口的当前实现正确，不据此追加验收门槛。CUDA最终对照尚未在本轮执行，D08保持IN_PROGRESS。
 
 - D08在Session089实际验收：原代码三独立训练进程全部成功，baseline12次更新、interrupt6次、resume新增6次且累计12次；数据一致、批次顺序/历史前缀/三类RNG均接续正确，模型/优化器完整状态恢复实现正确。但默认cuDNN deterministic=False时，一次新运行模型最大差约6.06e-5、模型及优化器比较False，暂不标记整章PASSED。导师仅在隔离测试进程开启benchmark=False/deterministic=True后，同样三路实验与学生compare全部通过、模型完整state_dict逐项相等，最大差0；这是定位证据，不冒充学生已经补好配置。下一步只补这一初始化设置再最终复核；不追加精度/问答/工程关卡。
 
@@ -1036,6 +1046,30 @@
 - **定位性复测**：检查代码无cuDNN确定性初始化，当前benchmark=False、deterministic=False。只在新隔离测试进程、训练前设benchmark=False/deterministic=True，重复原有4/2/续2轮流程（额外24次小规模更新，因前次失败而进行定位），所有进程退出0；学生compare批次/模型/优化器组/优化器状态与全部history项True，模型完整state_dict逐项equal、最大差0。此为导师进程配置后的诊断证据，未写回学生源码、不要求跨设备逐位一致。
 - **结论与最小修正提示**：保存恢复与记录核心实现通过检查，D08整体保持IN_PROGRESS，仅待学生在train.py启动、CUDA模型/训练开始前统一配置两项cuDNN属性再复核。不以放宽容差代替定位，也不要求改写checkpoint/训练循环或补充口头/注释关卡。interrupt重复生成并覆盖同文件本次数据确实相同，后续可改为读固定缓存；config缺batch_size/更多环境信息及compare_history返回布尔列表均为非阻塞整理建议。
 - **环境/来源/Git**：Python3.11.17、Torch2.10.0+cu128、CUDA12.8可用、RTX PRO6000 Blackwell；查阅官方2.10 reproducibility文档的cuDNN算法确定性说明。仅更新PROGRESS.md，未改依赖、覆盖已有产物、执行Git同步或推进下一课。
+
+### Session 090 — 2026-10-26（Git pull 后恢复 D08，补讲训练状态与cuDNN确定性）
+
+- **恢复与真实位置**：按学生请求读取磁盘 AGENTS.md、教学 skill、当前进度与最近实际 Session089、LEARNING_PLAN.md D08框架、lessons/INDEX.md，逐一查看D08八模块。以磁盘进度恢复到D08 IN_PROGRESS；C01–D07及P-C既有通过结论保留，不沿用本会话早期C11快照。初始本地main跟踪origin/main、工作区干净，未检查远端或执行pull，不声称远端同步已验证。
+- **代码观察**：train.main统一创建数据/模型/AdamW/CPU loader Generator，恢复时load_checkpoint先载入模型和优化器、最后恢复CPU/CUDA/loader RNG，后续训练循环使用已完成轮数；现有train/config中仍未设置cuDNN确定性属性。固定数据和三路模式、日志/批次对照沿用原任务，不代写或重构学生代码。
+- **本机环境**：dllab实测Python3.11.17、Torch2.10.0+cpu、CUDA False；train.py仍为device='cuda'，checkpoint也使用CUDA RNG接口，本轮未执行训练/compare或读写已有产物。之前CUDA的运行/定位结果仅引用Session089历史证据，不标记本机重验或D08通过。
+- **讲解范围**：恢复训练需同时接续模型参数及BN buffers、AdamW step/moments、批次与随机状态、计数/历史；seed是序列起点而get/set_state保存/恢复当前位置。即使RNG/数据完全相同，非确定性CUDA卷积也可能因浮点归约路径产生差异。cuDNN是GPU卷积等运算的后端库；benchmark控制搜索最快卷积算法，deterministic限制确定性卷积实现，二者为进程级布尔属性，赋值非函数调用、不返回新模型。不同设备/版本仍无完全复现保证。
+- **最小实施框架**：先在train.main入口、不进入任何MODE分支且早于模型/CUDA计算的位置设置两个布尔属性；baseline/interrupt/resume各新进程均执行同一初始化，不将设置写在仅resume分支或checkpoint载入后。可选拆初始化函数，非必做。具备CUDA环境后按原任务连续4轮、独立2+2轮，核对12/6/12步、4/2/4行history、12/6/12批，恢复历史/批次前缀以及模型/优化器/后两轮指标在原容差内一致；不要求逐位相等或新增训练/问答关卡。主流程伪代码与字段沿用已有框架，不重写保存恢复。
+- **状态与下一步**：D08保持IN_PROGRESS；本轮为补讲与设备恢复，无新的学生修改/运行/独立理解证据。当前最先做统一初始化设置，最终CUDA复核待设备；不自动进入D09。仅更新学习记录，未修改源码、依赖或执行Git同步。来源核对官方PyTorch2.10 randomness/backends/Generator文档。
+
+### Session 091 — 2026-10-26（检查学生补入的cuDNN入口配置）
+
+- **恢复与范围**：读取最新当前位置、最近实际Session090、D08规划与train.py全文及Git diff；本轮只审阅入口配置，不运行训练或修改学生源码。
+- **实际修改**：train.py第126–130行的__main__保护块中，先设置torch.backends.cudnn.benchmark=False、deterministic=True，再调用main()。值与顺序正确；直接运行脚本时早于数据/模型/CUDA计算，且不受MODE分支影响，baseline/interrupt/resume均覆盖。
+- **Python语法补充**：__main__保护块是直接执行脚本的入口判断，不是def main的函数体。导入train模块时保护块不执行，随后显式调用main也不会执行其中设置。若用该启动方式复核，需确保同样初始化；把配置放main开头可兼顾两条路径，但不将已有直接入口实现判为核心错误。
+- **状态与下一步**：本次配置修改审阅通过，D08整体仍IN_PROGRESS，仅缺CUDA环境中的三独立训练进程及compare最终复核；当前CPU环境不具备原CUDA实验条件，未虚构运行或确定性结果。后续验证须尊重学生实际入口，不能绕过设置后将差异归咎于未配置。未改依赖、产物或执行Git同步。
+
+### Session 092 — 2026-10-26（授权进入D09，CPU先学累积与裁剪）
+
+- **恢复与授权**：用户询问是否可进入下一节，按行动请求推进D09独立内容。重读当前进度、最近Session091、教学skill、AGENTS规则、D09规划及D08 engine；本地尚无d09目录/代码，不假定已有实现。D08恢复核心与入口配置审阅结论保留，未将待CUDA复核改为通过。
+- **教学组织**：当前CPU先实践梯度累积和裁剪，说明它们与AMP的关系，CUDA AMP性能实验待设备。对照D08每batch清grad/更新一次的逻辑，解释一个累积窗口清一次、每微批立刻backward、窗口结束才step；等长两个mean微批各除2，不等长按样本数加权。使用无BN/Dropout线性模型保证可对照，不把微批累积普遍等同于含BN的大batch。
+- **原理/API**：梯度线性累加对应平均损失，clip_grad_norm_将全部参数grad视为统一向量，保留方向并限制总L2范数、原地修改grad，返回裁剪前范数，位于所有backward之后/step之前。AMP概念为不同操作选用合适精度；FP16梯度缩放先放大loss再还原grad，若配合裁剪须在累积窗口结束先unscale再clip/step，不能直接裁剪放大的梯度。未提供完整代码。
+- **任务与框架**：新增LEARNING_PLAN.md D09 CPU逐块框架。学生手写lessons/d09/20_grad_accum_clip.py，四个CPU float32 [4,1]样本X=-2/-1/1/2、Y=2X+1；seed42，三个独立Linear(1,1)在训练前复制相同初始状态，各自SGD lr.1、无动量/衰减。比较完整batch一次backward/step、两个等长微批loss各除2两次backward/一次step、同样累积后按max_norm.1裁剪再一步。输出梯度、更新后参数、调用次数和前后总范数，无额外训练轮数、checkpoint、计时、绘图或精度门槛。函数拆分可选，数据/同起点与参考组是最先实现的一步。
+- **状态/目录/证据**：D09 CPU EXPLAINED，AMP CUDA实践未完成，无运行或掌握证据。只准备空课程outputs/.gitkeep并登记待实现路径，不代写核心脚本；D08仍IN_PROGRESS。当前沿用Session090确认的CPU环境，不改变设备或依赖，不执行Git同步。
 
 ## 7. 后续 Session 模板（复制本段追加，不要覆盖历史）
 

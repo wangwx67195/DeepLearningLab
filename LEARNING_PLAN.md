@@ -330,6 +330,19 @@ DeepLearningLab/
 
 主流程伪代码为“准备固定数据 → 创建同起点模型/优化器/独立loader生成器 → 若resume则恢复全部状态且最后恢复RNG → 按剩余轮数训练/评估/追加记录 → 保存当前完整状态与日志 → resume与baseline对照”。第一步只需复用已有类，完成固定数据文件与一轮训练记录，再扩展快照/恢复；不要求先实现完整工程框架。不要求中途batch精确恢复、分布式、额外消融、绘图、安装日志库或重复测试集评估。实际学生进度只记PROGRESS.md。
 
+**D09 当前组织（2026-10-26）**：学生授权在Windows CPU环境先学习下一节；D08入口确定性配置已审阅正确，CUDA最终复核继续保留，不据此标记D08通过。D09先集中讲解/实践梯度累积与全局梯度范数裁剪，说明AMP自动选择运算精度、FP16梯度缩放以及先unscale后clip的配合顺序。CUDA AMP、显存/速度/数值对照待CUDA环境，当前CPU子任务通过不等于整章AMP实验已完成。不改D08已正确的恢复逻辑或追加长训练。
+
+**D09 CPU实现框架：`lessons/d09/20_grad_accum_clip.py`（学生手写）**。本轮使用熟悉的线性回归隔离更新机制，避免TinyResNet的BatchNorm批统计使微批与大批本来就不等价。CPU float32，X=[[-2],[-1],[1],[2]]、Y=2X+1，均[4,1]；seed42，三个独立nn.Linear(1,1)先复制同一初始state_dict，再创建各自SGD(lr=.1,momentum=0,weight_decay=0)，无Dropout/BN。只做每组一次参数更新，不要求多轮收敛、下载、保存、计时或精度门槛。
+
+| 功能块/目的 | 输入输出与操作 | API及使用位置/副作用 | 核心自查 |
+|---|---|---|---|
+| 1. 准备同起点 | X/Y为CPU float32 [4,1]；三模型weight [1,1]/bias [1]；输出三组独立模型/优化器 | torch.manual_seed在初始化前；nn.Linear(1,1)输出[B,1]；load_state_dict在任何更新前复制初值，不将返回报告赋给模型；SGD绑定各自参数 | 三组初值相同、参数对象独立；函数化/多模块为可选 |
+| 2. 完整batch参考 | 四样本MSE mean标量，清grad→前向→backward→记录梯度→step一次 | nn.MSELoss默认对全部误差元素mean；backward累积grad不更新参数；zero_grad(set_to_none=True)清梯度，step更新参数 | backward_calls=1、optimizer_steps=1；保留梯度和更新后参数供比较 |
+| 3. 两个微批累积 | 按原顺序分两个[2,1]微批；每个mean loss除2后立即backward，两个微批结束后step一次 | 清grad仅在窗口开头；microbatch循环内不step/zero_grad，不需retain_graph；若梯度记录后还要修改，可detach().clone保存 | backward_calls=2、optimizer_steps=1；与参考组梯度及更新后参数allclose(rtol1e-5,atol1e-6)；解释不等长微批应按样本数加权，但不布置额外变体 |
+| 4. 累积后裁剪 | 第三组重复相同累积，step前将全部参数梯度合并视为一个向量，L2阈值0.1，输出前后范数及更新后参数 | nn.utils.clip_grad_norm_(model.parameters(),max_norm=.1,norm_type=2)在所有backward之后且step之前调用，原地改grad，返回裁剪前范数；裁剪后范数由各grad平方求和再开根计算 | 裁剪后总范数≤阈值（允许小浮点误差），每组仍仅step一次；不要求裁剪组与未裁剪组参数一致 |
+
+主流程伪代码：“准备四样本与三个同起点模型 → 完整batch参考一步 → 两微批按1/2缩放累积并更新一步 → 同样累积后裁剪再更新一步 → 对照梯度/参数/更新次数与裁剪前后范数”。记录可用打印或字典，必要内容为方法名、backward次数、step次数、参考/累积梯度与更新后参数、裁剪前后范数，不强制记录文件或函数签名。当前第一步只准备数据与同起点模型，再完成参考组。AMP后续使用autocast选择合适精度，CUDA FP16场景GradScaler负责scale/backward、窗口结束unscale、clip、scaler.step/update；不在当前CPU脚本中直接运行CUDA API，不强制手工model.half。
+
 **验收项目 P-D**：完整图像分类工程（小数据集，禁止以 SOTA 为目标）。必须至少包含 `model.py`、`train.py`、`evaluate.py`、配置、训练日志、checkpoint、README、至少 3 个有意义的测试。学生自己实现核心类/训练循环。
 
 ## 8. 阶段 E：Transformer、语言建模与 mini-GPT（E01–E14）
