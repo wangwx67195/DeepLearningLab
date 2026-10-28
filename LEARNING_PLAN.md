@@ -1,13 +1,13 @@
 # DeepLearningLab：从 Python 初学者到独立实现现代深度学习算法
 
-> 版本：v1.0（2026-10-10）  
+> 版本：v1.1（2026-10-28 目标与节奏复核；保留既有课程索引和历史）
 > 文件作用：**长期课程总纲 + 课程验收标准 + 跨 Agent 交接依据**。  
-> 配套文件：`AGENTS.md`（Codex 的常驻约束）、`PROGRESS.md`（唯一可信的实际进度）、`.agents/skills/deep-learning-mentor/SKILL.md`（教学工作流）。  
-> 项目根目录：`~/projects/DeepLearningLab/`。
+> 配套文件：`AGENTS.md`（常驻约束）、`PROGRESS.md`（唯一实际进度）、`.agents/skills/deep-learning-mentor/SKILL.md`（教学工作流）、`docs/MENTOR_GUIDE.md`（备课/审阅/记录操作）、`docs/RESOURCE_MAP.md`（作者资料与课程映射）。
+> 项目根目录以当前工作区与设备实测为准；Windows 为 `C:\Github\projects\DeepLearningLab`，Linux 路径按 PROGRESS.md 的设备记录核实，不因原始路径示例自动移动仓库。
 
 ## 0. 读者说明：请新 Agent 先看这里
 
-本项目是一门以**学生亲手写代码**为核心的长期、个性化编程课程。学生是计算机与机器学习方向研究生，有一定 Python 基础（知道变量赋值、函数、类的概念），但缺乏 Python 进阶知识、依赖/环境管理经验、PyTorch API 和从零搭建工程的经验。以前经常让 AI 直接生成代码，因此本课程必须反向纠正这一习惯。
+本项目是一门以**学生亲手写代码**为核心的长期、个性化编程课程。学生明确自述为计算机专业研究生，希望以原理与编程结合的方式入门深度学习。具体 Python、数学和 PyTorch 基础以实际作业及学生反馈判断，不因学历预设熟练，也不把旧阶段的困难当作永久能力标签。AI 提供目标、提示、API 说明和审阅，由学生完成核心实现。
 
 **最终学习目标不是“跑通一个教程”，而是在不用 AI 代写核心算法的条件下：**
 
@@ -19,6 +19,16 @@
 6. 能独立定位报错、复现实验、做消融、为代码编写测试并评估是否符合论文原理。
 
 **特别注意：**截至本计划建立时，学生仅在先前对话中**听过**第 1 节课的说明，尚未提交作业，也未验证其掌握情况。不能把“讲过”当作“已通过验收”。具体状态以 `PROGRESS.md` 为准。
+
+### 2026-10-28 目标复核：后续教学的优先解释
+
+目标与方法总体一致，保留已通过成果；本次调整解决过长前置工程、课题碎片化、旧交接快照误导等问题。当前优先路线为“已有神经网络基础 → D09 累积/裁剪 → D10 与现有成果的必要验证 → 字符语言模型 → 因果注意力 → mini-GPT训练/采样 → nanoGPT源码对照”。D08 CUDA最终复核和D09 CUDA AMP实验保留为明确待补事项，不阻塞独立的CPU主题。
+
+- 每个主题有数学问题、手写代码产物和少量核心验证；具体安排见下方E阶段主题课表。主题不是一次回复必须写完的代码量，可以按学生反馈分几次讲解和实现。
+- mini-GPT先用字符词表、小模型和小文本，做到训练/验证/生成/恢复可解释。完整BPE、RoPE、KV Cache、FlashAttention、DDP及复现GPT-2规模是后续扩展，不作首个模型的前置门槛。
+- P-D以已有D阶段实现综合核对；不为了文件名、模块数或测试个数再写一个相同分类工程。真正影响数学/数据/更新正确性的错误仍需学生修正。
+- 每次备课选与本主题直接对应的作者章节/练习及当前官方API，不要求按清单先看完全部视频或slides；教材旧代码与本机版本不一致时解释差异，不能照抄安装或性能结论。
+- 参考资料核实范围与链接见 `docs/RESOURCE_MAP.md`；本次检查结论见 `docs/LEARNING_AUDIT_2026-10-28.md`。这些是路线与审查记录，实际下一步只读 `PROGRESS.md`。
 
 ## 1. 真实环境和现有项目状态（2026-10-10）
 
@@ -40,6 +50,8 @@
 ```
 
 - `nanoGPT/` 的现有内容、Git 状态、环境实际可用性都**尚未由导师验证**；开始前只读检查，**不得覆盖或重置**。
+
+2026-10-28目录核对：当前Windows工作区未发现 `nanoGPT/`，上面的目录树为建立计划时的历史记录；不据此自动克隆或创建。将来按需引入参考仓库，学生手写实现放在独立项目位置。
 
 ### 1.2 环境操作约定
 
@@ -164,9 +176,9 @@ DeepLearningLab/
 
 主线建议按顺序推进：
 
-`Python → NumPy/数学 → PyTorch Tensor/Autograd → MLP/CNN/训练 → 工程化 → Transformer/mini-GPT → VAE/GAN/Normalizing Flow → Diffusion → Flow Matching → 扩展算法 → 阅读真实项目与研究复现`
+`以C/D实际作业为起点（Python/数学按需补）→ 字符语言模型 → 因果Transformer/mini-GPT → nanoGPT源码对照 → 按研究需求扩展VAE/GAN/Flow/Diffusion/Flow Matching`
 
-**可交叉训练**：从阶段 2 开始持续做源码阅读；从阶段 3 开始持续写测试；工程与调试贯穿始终。不要为了追赶日期跳过关键前置条件。
+**纵向训练**：工程、源码阅读和必要正确性检查随当前算法逐步引入；不另设必须先完成的工程化阶段。不要为了追赶日期跳过关键前置条件，也不因无关环境/风格问题反复扩张前置任务。
 
 下列建议课次编号是**课程索引**，不是已存在的文件，也不是固定学时。每课视难度可拆成几次对话。
 
@@ -343,7 +355,7 @@ DeepLearningLab/
 
 主流程伪代码：“准备四样本与三个同起点模型 → 完整batch参考一步 → 两微批按1/2缩放累积并更新一步 → 同样累积后裁剪再更新一步 → 对照梯度/参数/更新次数与裁剪前后范数”。记录可用打印或字典，必要内容为方法名、backward次数、step次数、参考/累积梯度与更新后参数、裁剪前后范数，不强制记录文件或函数签名。当前第一步只准备数据与同起点模型，再完成参考组。AMP后续使用autocast选择合适精度，CUDA FP16场景GradScaler负责scale/backward、窗口结束unscale、clip、scaler.step/update；不在当前CPU脚本中直接运行CUDA API，不强制手工model.half。
 
-**验收项目 P-D**：完整图像分类工程（小数据集，禁止以 SOTA 为目标）。必须至少包含 `model.py`、`train.py`、`evaluate.py`、配置、训练日志、checkpoint、README、至少 3 个有意义的测试。学生自己实现核心类/训练循环。
+**验收项目 P-D（2026-10-28调整）**：综合核对已有D阶段学生实现，确认数据划分、模型/损失、梯度更新、训练/评估模式、日志与检查点的核心行为正确；优先复用D07/D08及D10的实际证据，不要求另写完整分类项目、指定模块/测试文件数量或新增README。必要检查针对已遇到的真实Bug和核心性质；已有有效检查可复用。CUDA待补范围单独记录，不把静态检查冒充实测，也不阻塞不依赖CUDA的E阶段主题。学生仍自己实现模型与训练核心，无SOTA/固定精度要求。
 
 ## 8. 阶段 E：Transformer、语言建模与 mini-GPT（E01–E14）
 
@@ -353,18 +365,32 @@ DeepLearningLab/
 |---|---|---|
 | E01 | 序列建模、token、词表、字符级 tokenization | 实现字符编码和解码 |
 | E02 | n-gram、语言模型概率分解、next-token 目标 | 从原始字符串构造输入/标签 |
-| E03 | Embedding、位置编码（learned/sinusoidal/RoPE 基础） | 解释 `(B,T,C)` |
-| E04 | Attention 的 Q/K/V 与缩放点积 | 在最小矩阵中手算注意力 |
+| E03 | Embedding与上下文表示；位置表示按GPT需要引入 | 手写小型上下文预测模型，追踪 `(B,T,C)` |
+| E04 | Attention 的 Q/K/V 与缩放点积 | 实现分数/加权汇总并核对Shape，不强制整张量手算 |
 | E05 | Causal mask、softmax、数值稳定性 | 验证未来 token 不可见 |
 | E06 | Single-head Self-Attention 独立实现 | 写模块与维度测试 |
 | E07 | Multi-head Attention、head reshape/transpose | 验证多头拼接和投影 |
 | E08 | Residual、LayerNorm、MLP、Pre-Norm | 手写 Transformer Block |
 | E09 | Decoder-only GPT 堆叠、权重共享/初始化 | 实现模型并计算参数量 |
 | E10 | 交叉熵、Teacher Forcing、训练小 GPT | 证明模型可过拟合少量文本 |
-| E11 | 自回归采样、temperature/top-k/top-p | 实现文本生成器 |
+| E11 | 自回归采样、temperature/top-k；top-p可选 | 实现文本生成器 |
 | E12 | checkpoint、验证困惑度、实验记录 | 训练/推理分离并复现输出 |
 | E13 | 阅读 nanoGPT 并建立论文/模块映射 | 输出数据流、调用图、参数表 |
-| E14 | 复杂度、KV Cache、SDPA/FlashAttention、推理效率 | 与手写 Attention 做一致性对照 |
+| E14 | 复杂度、KV Cache、SDPA/FlashAttention、推理效率（首个mini-GPT之后扩展） | 与手写 Attention 做一致性对照 |
+
+**实际授课按完整主题组合，保留E01–E14索引以追溯，不机械逐API开课：**
+
+| 主题课块 | 对应索引 | 原理与学生代码产物 | 核心验证及参考位置 |
+|---|---|---|---|
+| 1. 从文本到可采样的语言模型 | E01–E02 | 字符词表/encode-decode、next-token概率分解、错位输入标签与bigram基线；IDs [B,T] long，logits [B,T,V] float | 编解码往返、标签右移一位、loss有意义及采样ID合法；Zero to Hero makemore bigram |
+| 2. 从查表到学习上下文 | E03 | Embedding、固定长度上下文和小MLP预测器；[B,T]→[B,T,C]→类别logits，联系已学CE/训练；GPT用的learned position在需要时加入 | 参数收到梯度、输出与目标对应、正确训练/验证划分；makemore MLP，nanoGPT token/position embeddings |
+| 3. 一个完整的因果注意力头 | E04–E06 | Q/K/V、缩放点积、softmax轴、causal mask与加权汇总一并实现；[B,T,C]→分数[B,T,T]→输出[B,T,H] | 概率沿key轴归一、改变未来token不影响过去输出、梯度有效；GPT课程及CausalSelfAttention |
+| 4. 一个可堆叠的Transformer Block | E07–E08 | 多头拆分/合并、输出投影、Pre-LN、残差与MLP组成完整Block；[B,T,C]→[B,T,C] | 两路残差Shape相同、head维度正确、无未来泄漏；nanoGPT Block/MLP/LayerNorm |
+| 5. 训练自己的小GPT | E09–E10 | token/position表示、Block堆叠、分类头与序列CE接入；logits[B,T,V]与targets[B,T] | 可拟合小文本，训练/验证分开，报告损失与资源配置；nanoGPT GPT.forward与train |
+| 6. 让模型生成并保存成果 | E11–E12 | temperature/top-k、自回归上下文裁剪、生成、恢复推理与验证困惑度；复用已学checkpoint能力 | ID范围、输出长度、恢复后预测一致，不要求生成语义质量或固定perplexity；GPT.generate/sample.py |
+| 7. 对照nanoGPT并解释差异 | E13 | 将本人实现对应data/get_batch、model/Block、train/optimizer、generate/sample，选一处小型数值/行为对照 | 说清公式/Shape/数据流与不同设计；不抄完整答案，不先做DDP或大规模GPT-2复现 |
+
+每块可跨数次会话。上表是课程目标和产物框架，不是一次性作业；开课时仍按学生当前代码给出目的→输入输出→操作/API→自查→第一步。源码阅读课应有一个小型代码观察/对照，纯概念内容也配套可计算产物；不为已通过的相同知识重复建项目。E14、完整BPE及现代结构扩展在首个P-E闭环之后安排。
 
 ### P-E：mini-GPT 必须满足的验收要求
 
@@ -386,7 +412,7 @@ Encoder-only / Encoder-Decoder；Cross-Attention；RoPE 细节；RMSNorm / SwiGL
 
 | 课次 | 学习主题 | 学生亲手任务 |
 |---|---|---|
-| F01 | 生成建模：显式似然/隐式生成、采样与推理 | 建模任务比较 |
+| F01 | 生成建模：显式似然/隐式生成、采样与推理 | 用toy分布做概率/采样计算并比较任务 |
 | F02 | Autoencoder：Encoder/Decoder/重建损失 | 在低维或简化图像数据上重建 |
 | F03 | VAE：ELBO、重参数化、KL、潜变量 | 手推并实现基本 VAE |
 | F04 | β-VAE、Posterior Collapse、潜变量插值 | 分析重建-正则权衡 |
@@ -394,7 +420,7 @@ Encoder-only / Encoder-Decoder；Cross-Attention；RoPE 细节；RMSNorm / SwiGL
 | F06 | GAN 稳定性：mode collapse、判别器失衡 | 诊断失败现象 |
 | F07 | Normalizing Flow、变量代换、Jacobian | 用简单可逆映射算密度 |
 | F08 | Coupling Layers / RealNVP、可逆性 | 训练二维密度模型 |
-| F09 | 对比 VAE/GAN/Flows/AR/扩散与流匹配 | 写一份公式-代码-训练-采样对照笔记 |
+| F09 | 对比 VAE/GAN/Flows/AR/扩散与流匹配 | 调用本人已写采样器做小型对照，再整理公式/代码/训练/采样映射 |
 
 **验收 P-F**：VAE + 2D Normalizing Flow 两个小实现；清楚区分 encoder 近似后验、flow 可逆映射、生成时从哪个分布采样；GAN 可作为附加小实验。
 
@@ -554,7 +580,7 @@ Encoder-only / Encoder-Decoder；Cross-Attention；RoPE 细节；RMSNorm / SwiGL
 
 ## 16. 实验验证习惯与算法质量标准
 
-任何算法实现都优先测试下列 8 点：
+按当前算法的真实风险选择以下检查，不是每节课强制完成全部八项，也不要求固定测试数量：
 
 1. **Shape**：输入/输出满足约定；不正确时尽早报错。
 2. **dtype/device**：CPU/GPU、float32/bfloat16、整数标签是否正确。
@@ -569,12 +595,12 @@ Encoder-only / Encoder-Decoder；Cross-Attention；RoPE 细节；RMSNorm / SwiGL
 
 ## 17. 进度状态、优先级与跨会话交接
 
-### 17.1 三种知识状态不能混淆
+### 17.1 进度状态与证据范围不能混淆
 
 - `NOT_STARTED`：尚未系统讲授。
 - `EXPLAINED`：讲授/演示过，但没有验收学生独立实现。
 - `IN_PROGRESS`：学生已经开始亲手编写、未完成验收。
-- `PASSED`：已完成代码、解释、验证。
+- `PASSED`：在已明确的任务/设备范围内，学生代码已验证运行正确且体现核心内容；提示依赖、独立解释程度及待补设备实验分别记录，不因此自动等同于全面独立熟练。
 - `NEEDS_REVIEW`：曾完成但核心理解存在缺口，需要复习。
 - `OPTIONAL`：研究方向选修，暂不影响主线推进。
 
@@ -586,7 +612,7 @@ Encoder-only / Encoder-Decoder；Cross-Attention；RoPE 细节；RMSNorm / SwiGL
 - 学生**亲手编写或修改**的文件及简述，不要贴整段代码。
 - 验收证据（测试命令/结果、Git commit 可选）。
 - 现在**确实掌握**与**仍不清楚**的点。
-- 下次进入课程前复习的 1–3 个问题。
+- 仅在发现具体理解缺口时记录少量待复习点，不把固定数量的问题变成每次开课必答关卡。
 - 下一个**具体最小任务**（可在 20–60 分钟内完成的粒度，不是整个里程碑）。
 - 遗留错误/环境变更/需要注意的本地文件。
 
@@ -605,7 +631,9 @@ Encoder-only / Encoder-Decoder；Cross-Attention；RoPE 细节；RMSNorm / SwiGL
 - **检查范围**：本地 Git 状态只能说明当前工作区情况，不能证明远端没有新提交。发现同步冲突时保留双方实际记录，依据代码与验收证据核对；不能仅按更晚日期或更高课次覆盖进度。
 - **设备环境**：作业路径使用仓库相对路径；Windows/Linux、CPU/CUDA 等环境分别记录。切换设备后重新核实当前解释器和所需设备，不能把另一设备的成功运行当成本机验证。
 
-## 18. 本课程的当前学习状态与下一步（建立计划当天）
+## 18. 建立计划当天的历史快照（2026-10-10，仅存档）
+
+本节保留原始首课安排用于追溯，不代表当前待办；恢复课程只能使用PROGRESS.md最新当前状态与实际Session Log。
 
 ### 已经讲解，但未验收
 
@@ -621,7 +649,7 @@ Encoder-only / Encoder-Decoder；Cross-Attention；RoPE 细节；RMSNorm / SwiGL
 - 学生是否真正理解 `mean(dim=0)` vs `mean(dim=1)`、`x.to('cuda')` 是否原地、二维索引。
 - Python 高级语法、Autograd、训练循环是否可独立编写。
 
-### **第一项待办：C01 / Lesson 01（不要越级）**
+### 历史首课任务：C01 / Lesson 01（不是当前待办）
 
 学生在 `~/projects/DeepLearningLab/lessons/c01/01_tensor.py` **自己手写**：
 
@@ -644,7 +672,7 @@ Encoder-only / Encoder-Decoder；Cross-Attention；RoPE 细节；RMSNorm / SwiGL
 
 通过课程后，学生应该能在有限查阅官方文档的前提下：
 
-- 90 分钟内把小神经网络的数学公式翻译为结构清晰的 PyTorch 模型类和训练循环（不要求固定速度）。
+- 将小神经网络的数学公式翻译为结构清晰的PyTorch模型与训练流程；以正确性和解释能力为准，不设置固定完成时限。
 - 不看现成源码，独立重建 Transformer Block 的重要组件，写 Shape / causal mask / gradient 测试。
 - 维护自己的 mini-GPT：配置、训练、评价、生成、ckpt、复现均可自行调试。
 - 独立实现 toy DDPM 与 toy Flow Matching，解释 loss 与采样器差别，正确比较公式与 Shape。
@@ -663,6 +691,10 @@ Encoder-only / Encoder-Decoder；Cross-Attention；RoPE 细节；RMSNorm / SwiGL
 - PyTorch API：https://docs.pytorch.org/docs/stable/index.html
 - micrograd：https://github.com/karpathy/micrograd
 - nanoGPT：https://github.com/karpathy/nanoGPT
+- Zero to Hero课程与讲义：https://karpathy.ai/zero-to-hero.html 、 https://github.com/karpathy/nn-zero-to-hero
+- minGPT教育参考：https://github.com/karpathy/minGPT
+- minbpe练习（首个字符GPT后按需）：https://github.com/karpathy/minbpe/blob/master/exercise.md
+- 作者资料的核实范围、使用顺序及课程映射：`docs/RESOURCE_MAP.md`。
 - Attention Is All You Need：https://arxiv.org/abs/1706.03762
 - DDPM：https://arxiv.org/abs/2006.11239
 - DDIM：https://arxiv.org/abs/2010.02502
@@ -677,7 +709,7 @@ Encoder-only / Encoder-Decoder；Cross-Attention；RoPE 细节；RMSNorm / SwiGL
 
 将本包文件放到 `~/projects/DeepLearningLab/` 的相应相对路径后，从此目录启动 Codex。你可以对新 Agent 说：
 
-> 请先阅读项目根目录的 `AGENTS.md`、`LEARNING_PLAN.md`、`PROGRESS.md`，并按需要使用 `deep-learning-mentor` skill。你是我的编程导师，不是代写者。请只读检查 `lessons/` 与环境；我希望继续做第一节 Tensor 作业，先询问我已经写了哪些内容，不要自动生成完整解答。之后每次学习完成再根据证据更新 `PROGRESS.md`。
+> 请先阅读项目根目录的 `AGENTS.md`、`PROGRESS.md` 当前状态及最近实际Session，再读 `LEARNING_PLAN.md` 对应主题并按需要使用 `deep-learning-mentor` skill。你是我的编程导师，不是代写者。先只读查看本课已有代码，说明当前状态与下一项最小任务；用原理、实现框架、提示和API指导我手写，验收后按真实证据更新记录。不要凭旧聊天或规划快照从头开课。
 
 如果切换回网页 ChatGPT，只需上传 `LEARNING_PLAN.md`、`PROGRESS.md` 和必要代码，就可以较可靠地恢复到当前课程状态。**任何 Agent 都可能丢失会话上下文，磁盘上的进度与代码才是持续交接的依据。**
 

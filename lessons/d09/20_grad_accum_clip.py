@@ -100,13 +100,13 @@ def grad_norm(model):
     sq_sum_w = grad_w.square().sum()
     sq_sum_b = grad_b.square().sum()
 
-    norm = torch.sqrt(sq_sum_w, sq_sum_b)
+    norm = torch.sqrt(sq_sum_w + sq_sum_b)
 
     return norm
 
 def accumulation_clip(model, optimizer, loss_fn, input, tgt):
     X_chunks = torch.chunk(input, chunks = 2, dim = 0)
-    Y_chunks = torch.chunk(input, chunks = 2, dim = 0)
+    Y_chunks = torch.chunk(tgt, chunks = 2, dim = 0)
 
     optimizer.zero_grad()
 
@@ -124,7 +124,7 @@ def accumulation_clip(model, optimizer, loss_fn, input, tgt):
         norm_type = 2.0
     )
 
-    grad_w_cliped, grad_b_cliped = savegrad(model)
+    grad_w_clipped, grad_b_clipped = savegrad(model)
     norm_after = grad_norm(model)
 
     optimizer.step()
@@ -134,8 +134,8 @@ def accumulation_clip(model, optimizer, loss_fn, input, tgt):
     result = {
         "grad_w": grad_w,
         "grad_b": grad_b,
-        "grad_w_cliped": grad_w_cliped,
-        "grad_b_cliped": grad_b_cliped,
+        "grad_w_clipped": grad_w_clipped,
+        "grad_b_clipped": grad_b_clipped,
         "norm_before": norm_before,
         "norm_after": norm_after,
         "weight_after": weight_after,
@@ -151,7 +151,7 @@ def printParameter(model):
 def main():
     result_a = reference(model_a, optimizer_a, loss_fn, X, Y) # Original optimizer update
     result_b = accumulation(model_b, optimizer_b, loss_fn, X, Y) # minibatch optimizer update
-    result_c = accumulation(model_c, optimizer_c, loss_fn, X, Y) # minibatch optimizer update
+    result_c = accumulation_clip(model_c, optimizer_c, loss_fn, X, Y) # minibatch optimizer update
 
     same_grad_w = torch.allclose(
         result_a["grad_w"],
@@ -177,9 +177,15 @@ def main():
         rtol=1e-5,
         atol=1e-6
     )
-    same_grad_w_clip = torch.allclose(
+    same_grad_w_before_clip = torch.allclose(
         result_b["grad_w"],
         result_c["grad_w"],
+        rtol=1e-5,
+        atol=1e-6
+    )
+    same_grad_b_before_clip = torch.allclose(
+        result_b["grad_b"],
+        result_c["grad_b"],
         rtol=1e-5,
         atol=1e-6
     )
@@ -190,12 +196,28 @@ def main():
     print(f"same_grad_b = {same_grad_b}")
     print(f"same_weight = {same_weight}")
     print(f"same_bias = {same_bias}")
-    print(f"same_grad_w_clip = {same_grad_w_clip}")
+    print(f"same_grad_w_before_clip = {same_grad_w_before_clip}")
+    print(f"same_grad_b_before_clip = {same_grad_b_before_clip}")
 
-    print(f"norm_before = {result_c["norm_before"]}")
-    print(f"norm_after = {result_c["norm_after"]}")
-    print(f"grad_before_clip_direct = {(result_c["grad_w"], result_c["grad_b"])}")
-    print(f"grad_after_clip_direct = {(result_c["grad_w_after"], result_c["grad_b_after"])}")
+    norm_before = result_c["norm_before"]
+    print(f"norm_before = {norm_before}")
+    print(norm_before.item() > 0.1)
+    scale = min(1.0, 0.1 / norm_before.item())
+    expected_grad_w = result_c["grad_w"] * scale
+    same_scaled_grad_w = torch.allclose(
+        expected_grad_w,
+        result_c["grad_w_clipped"],
+        rtol=1e-5,
+        atol=1e-6
+    )
+    print(f"same_scaled_grad_w = {same_scaled_grad_w}")
+
+    norm_after = result_c["norm_after"]
+    assert norm_after.item() <= 0.1 + 1e-6
+    print(f"norm_after = {norm_after}")
+
+    print(f"grad_before_clip_direct = {(result_c['grad_w'], result_c['grad_b'])}")
+    print(f"grad_after_clip_direct = {(result_c['grad_w_clipped'], result_c['grad_b_clipped'])}")
 
 if __name__ == "__main__":
     main()
